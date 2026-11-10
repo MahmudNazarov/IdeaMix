@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Проекты — IdeaMix{% endblock %}
+{% block description %}Проекты сообщества IdeaMix: команды, технологии и идеи, которые уже превращаются в реальные продукты.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-grid">
+            <div class="page-hero-copy">
+                <span class="eyebrow"><i class="bi bi-kanban" aria-hidden="true"></i> Команды</span>
+                <h1>Проекты сообщества</h1>
+                <p>Идеи, вокруг которых уже собрались люди. Найдите проект по духу или создайте свой.</p>
+            </div>
+            <div class="page-hero-aside page-hero-actions">
+                <div class="page-hero-metric">
+                    <strong>{{ total_count|compact }}</strong>
+                    <span>проектов доступно</span>
+                </div>
+                <a class="btn btn-primary btn-lg"
+                   href="{% if user.is_authenticated %}{% url 'ideas:project_create' %}{% else %}{% url 'ideas:login' %}?next={% url 'ideas:project_create' %}{% endif %}">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Новый проект
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-tight">
+    <div class="container">
+        <form class="catalog-search project-search" method="get" data-skeleton-form>
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="q" value="{{ filters.q }}"
+                   placeholder="Название, технология, специалист или автор…" aria-label="Поиск проектов">
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+
+        <div class="filter-bar">
+            <form class="filter-form" method="get" data-autosubmit>
+                {% if filters.q %}<input type="hidden" name="q" value="{{ filters.q }}">{% endif %}
+                <label class="filter-field">
+                    <span>Категория</span>
+                    <select name="category" class="input input-select input-sm">
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                            <option value="{{ category.slug }}" {% if filters.category_slug == category.slug %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="filter-field">
+                    <span>Статус</span>
+                    <select name="status" class="input input-select input-sm">
+                        <option value="">Любой статус</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="filter-field">
+                    <span>Сортировка</span>
+                    <select name="sort" class="input input-select input-sm">
+                        <option value="new" {% if filters.sort == 'new' %}selected{% endif %}>Сначала новые</option>
+                        <option value="old" {% if filters.sort == 'old' %}selected{% endif %}>Сначала старые</option>
+                        <option value="members" {% if filters.sort == 'members' %}selected{% endif %}>Больше участников</option>
+                    </select>
+                </label>
+                <noscript><button class="btn btn-ghost btn-sm" type="submit">Применить</button></noscript>
+            </form>
+            <div class="filter-summary">
+                <span>Найдено: <strong>{{ total_count }}</strong></span>
+                {% if filters.q or filters.category_slug or filters.status %}
+                    <a class="clear-filters" href="{% url 'ideas:project_list' %}">Сбросить фильтры</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if page_obj.object_list %}
+            <div class="project-grid project-grid-wide">
+                {% for project in page_obj %}
+                    {% include 'includes/project_card.html' %}
+                {% endfor %}
+            </div>
+            {% include 'includes/pagination.html' %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-visual empty-visual-sm" aria-hidden="true">
+                    <span class="empty-orb"></span>
+                    <span class="empty-float empty-float-1"><i class="bi bi-kanban"></i></span>
+                    <span class="empty-float empty-float-2"><i class="bi bi-people"></i></span>
+                </div>
+                {% if filters.q or filters.category_slug or filters.status %}
+                    <h2>Подходящих проектов не нашлось</h2>
+                    <p>Попробуйте изменить категорию, статус или поисковый запрос.</p>
+                    <div class="empty-actions">
+                        <a class="btn btn-ghost" href="{% url 'ideas:project_list' %}">Сбросить фильтры</a>
+                        <a class="btn btn-primary" href="{% url 'ideas:project_create' %}">Создать проект</a>
+                    </div>
+                {% else %}
+                    <h2>Станьте автором первого проекта</h2>
+                    <p>Создайте проект, свяжите его с идеей и пригласите людей, которые помогут её реализовать.</p>
+                    <div class="empty-actions">
+                        {% if user.is_authenticated %}
+                            <a class="btn btn-primary" href="{% url 'ideas:project_create' %}">
+                                <i class="bi bi-plus-lg" aria-hidden="true"></i> Создать проект
+                            </a>
+                        {% else %}
+                            <a class="btn btn-primary" href="{% url 'ideas:register' %}">Присоединиться</a>
+                        {% endif %}
+                        <a class="btn btn-ghost" href="{% url 'ideas:explore' %}">Посмотреть идеи</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

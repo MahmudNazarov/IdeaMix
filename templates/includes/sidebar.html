@@ -1,0 +1,68 @@
+{% load idea_extras %}
+<aside class="catalog-sidebar" aria-label="Фильтры каталога">
+    <div class="sidebar-card">
+        <div class="sidebar-head">
+            <h2>Категории</h2>
+            <a class="sidebar-reset" href="{% url 'ideas:explore' %}" title="Сбросить фильтры">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            </a>
+        </div>
+        <nav class="sidebar-list">
+            <a class="sidebar-item {% if not request.GET.category %}active{% endif %}"
+               href="?{% url_replace category=None page=None %}">
+                <span><i class="bi bi-grid" aria-hidden="true"></i> Все идеи</span>
+            </a>
+            {% for category in categories %}
+                <a class="sidebar-item {% if request.GET.category == category.slug %}active{% endif %}"
+                   href="?{% url_replace category=category.slug page=None %}">
+                    <span><i class="bi {{ category.icon }}" aria-hidden="true"></i> {{ category.name }}</span>
+                    <span class="sidebar-count">{{ category.idea_count }}</span>
+                </a>
+            {% endfor %}
+        </nav>
+    </div>
+
+    <div class="sidebar-card">
+        <div class="sidebar-head"><h2>Статус</h2></div>
+        <nav class="sidebar-list">
+            <a class="sidebar-item {% if not request.GET.status %}active{% endif %}"
+               href="?{% url_replace status=None page=None %}">
+                <span><i class="bi bi-collection" aria-hidden="true"></i> Любой</span>
+            </a>
+            <a class="sidebar-item {% if request.GET.status == 'published' %}active{% endif %}"
+               href="?{% url_replace status='published' page=None %}">
+                <span><i class="bi bi-send" aria-hidden="true"></i> Опубликованные</span>
+            </a>
+            <a class="sidebar-item {% if request.GET.status == 'in_progress' %}active{% endif %}"
+               href="?{% url_replace status='in_progress' page=None %}">
+                <span><i class="bi bi-tools" aria-hidden="true"></i> В работе</span>
+            </a>
+            <a class="sidebar-item {% if request.GET.status == 'completed' %}active{% endif %}"
+               href="?{% url_replace status='completed' page=None %}">
+                <span><i class="bi bi-check2-circle" aria-hidden="true"></i> Реализованные</span>
+            </a>
+        </nav>
+    </div>
+
+    {% if popular_tags %}
+        <div class="sidebar-card">
+            <div class="sidebar-head"><h2>Популярные теги</h2></div>
+            <div class="tag-cloud">
+                {% for tag in popular_tags %}
+                    <a class="tag-chip {% if request.GET.tag == tag.name %}active{% endif %}"
+                       href="?{% url_replace tag=tag.name page=None %}">#{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="sidebar-cta">
+        <span class="sidebar-cta-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+        <h3>Есть идея?</h3>
+        <p>Опубликуйте её и найдите людей, готовых помочь с реализацией.</p>
+        <a class="btn btn-light btn-sm btn-block"
+           href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:login' %}?next={% url 'ideas:idea_create' %}{% endif %}">
+            Поделиться идеей
+        </a>
+    </div>
+</aside>

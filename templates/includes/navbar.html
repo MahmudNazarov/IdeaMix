@@ -1,0 +1,121 @@
+{% load idea_extras %}
+<header class="site-header" data-header>
+    <div class="container nav-shell">
+        {% include 'includes/logo.html' %}
+
+        <nav class="main-nav" id="main-nav" data-nav aria-label="Основная навигация">
+            <a href="{% url 'ideas:explore' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'explore' or request.resolver_match.url_name == 'search' %}active{% endif %}">
+                <i class="bi bi-compass" aria-hidden="true"></i><span>Идеи</span>
+            </a>
+            <details class="nav-dropdown">
+                <summary class="nav-link">
+                    <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>Категории</span>
+                    <i class="bi bi-chevron-down nav-caret" aria-hidden="true"></i>
+                </summary>
+                <div class="nav-dropdown-panel">
+                    {% for category in nav_categories %}
+                        <a href="{% url 'ideas:explore' %}?category={{ category.slug }}">
+                            <span class="dropdown-icon"><i class="bi {{ category.icon }}" aria-hidden="true"></i></span>
+                            {{ category.name }}
+                        </a>
+                    {% empty %}
+                        <span class="dropdown-empty">Категории скоро появятся</span>
+                    {% endfor %}
+                </div>
+            </details>
+            <a href="{% url 'ideas:project_list' %}"
+               class="nav-link {% if request.resolver_match.url_name|slice:':7' == 'project' %}active{% endif %}">
+                <i class="bi bi-kanban" aria-hidden="true"></i><span>Проекты</span>
+            </a>
+            <a href="{% url 'ideas:about' %}"
+               class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                <i class="bi bi-info-circle" aria-hidden="true"></i><span>О проекте</span>
+            </a>
+
+            <div class="mobile-nav-search">
+                <form action="{% url 'ideas:search' %}" method="get" role="search">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input type="search" name="q" value="{{ request.GET.q|default:'' }}"
+                           placeholder="Найти идею или человека" aria-label="Поиск по IdeaMix">
+                </form>
+            </div>
+            {% if not user.is_authenticated %}
+                <div class="mobile-auth">
+                    <a class="btn btn-ghost btn-block" href="{% url 'ideas:login' %}">Войти</a>
+                    <a class="btn btn-primary btn-block" href="{% url 'ideas:register' %}">Создать аккаунт</a>
+                </div>
+            {% endif %}
+        </nav>
+
+        <form class="nav-search" action="{% url 'ideas:search' %}" method="get" role="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="q" value="{{ request.GET.q|default:'' }}"
+                   placeholder="Поиск идей…" aria-label="Поиск идей" autocomplete="off">
+            <kbd>/</kbd>
+        </form>
+
+        <div class="nav-actions">
+            <button class="theme-toggle" type="button" data-theme-toggle
+                    aria-label="Включить тёмную тему" aria-pressed="false" title="Тёмная тема">
+                <i class="bi bi-moon-stars-fill theme-toggle-icon theme-toggle-moon" aria-hidden="true"></i>
+                <i class="bi bi-sun-fill theme-toggle-icon theme-toggle-sun" aria-hidden="true"></i>
+            </button>
+
+            <a class="btn btn-primary btn-sm nav-create"
+               href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:login' %}?next={% url 'ideas:idea_create' %}{% endif %}">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                <span>Создать идею</span>
+            </a>
+
+            {% if user.is_authenticated %}
+                <details class="user-menu">
+                    <summary class="avatar avatar-sm user-menu-toggle" aria-label="Меню профиля">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="Аватар {{ user.username }}">
+                        {% else %}
+                            <span>{{ user|initials }}</span>
+                        {% endif %}
+                        <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                    </summary>
+                    <div class="user-menu-panel">
+                        <div class="user-menu-head">
+                            <span class="avatar avatar-sm">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="">
+                                {% else %}
+                                    <span>{{ user|initials }}</span>
+                                {% endif %}
+                            </span>
+                            <div>
+                                <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                <span>@{{ user.username }}</span>
+                            </div>
+                        </div>
+                        <div class="user-menu-links">
+                            <a href="{% url 'ideas:profile' user.username %}"><i class="bi bi-person"></i> Мой профиль</a>
+                            <a href="{% url 'ideas:my_ideas' %}"><i class="bi bi-lightbulb"></i> Мои идеи</a>
+                            <a href="{% url 'ideas:profile' user.username %}?tab=projects"><i class="bi bi-kanban"></i> Мои проекты</a>
+                            <a href="{% url 'ideas:favorites' %}"><i class="bi bi-bookmark"></i> Избранное</a>
+                            <a href="{% url 'ideas:profile' user.username %}?tab=teams"><i class="bi bi-people"></i> Мои команды</a>
+                        </div>
+                        <div class="user-menu-footer">
+                            <a href="{% url 'ideas:profile_edit' %}"><i class="bi bi-gear"></i> Настройки</a>
+                            <form action="{% url 'ideas:logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit"><i class="bi bi-box-arrow-right"></i> Выйти</button>
+                            </form>
+                        </div>
+                    </div>
+                </details>
+            {% else %}
+                <a class="nav-login" href="{% url 'ideas:login' %}">Войти</a>
+            {% endif %}
+
+            <button class="nav-toggle" type="button" data-nav-toggle
+                    aria-controls="main-nav" aria-expanded="false" aria-label="Открыть меню">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>

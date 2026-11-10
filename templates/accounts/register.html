@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Регистрация — IdeaMix{% endblock %}
+{% block description %}Создайте аккаунт IdeaMix, чтобы публиковать идеи, собирать команду и превращать задумки в реальные проекты.{% endblock %}
+{% block main_class %}main-content main-auth{% endblock %}
+
+{% block content %}
+<div class="container auth-page">
+    <div class="auth-card">
+        <aside class="auth-visual">
+            <div class="auth-visual-glow" aria-hidden="true"></div>
+            <span class="eyebrow eyebrow-light"><i class="bi bi-stars" aria-hidden="true"></i> Присоединяйтесь</span>
+            <h2>От первой мысли<br>до реального проекта</h2>
+            <p>IdeaMix соединяет авторов идей с теми, кто готов помочь их воплотить: разработчиками, дизайнерами и исследователями.</p>
+
+            <ul class="auth-benefits">
+                <li>
+                    <span class="auth-benefit-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+                    <span><strong>Публикуйте идеи</strong>Делитесь публично или сохраняйте черновики.</span>
+                </li>
+                <li>
+                    <span class="auth-benefit-icon auth-benefit-icon-blue"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <span><strong>Собирайте команду</strong>Создавайте проекты и приглашайте участников.</span>
+                </li>
+                <li>
+                    <span class="auth-benefit-icon auth-benefit-icon-cyan"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span>
+                    <span><strong>Ведите прогресс</strong>Отмечайте этапы и делитесь результатом.</span>
+                </li>
+            </ul>
+
+            <div class="auth-visual-footer">
+                <span class="status-dot" aria-hidden="true"></span>
+                Бесплатно. Без скрытых условий.
+            </div>
+        </aside>
+
+        <div class="auth-form-side">
+            <div class="auth-form-head">
+                <span class="eyebrow">Создание аккаунта</span>
+                <h1>Начните с идеи</h1>
+                <p>Уже есть аккаунт? <a href="{% url 'ideas:login' %}">Войти</a></p>
+            </div>
+
+            <form class="auth-form" method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-alert" role="alert">
+                        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.first_name %}
+                    {% include 'includes/form_field.html' with field=form.last_name %}
+                </div>
+                {% include 'includes/form_field.html' with field=form.username %}
+                {% include 'includes/form_field.html' with field=form.email %}
+                {% include 'includes/form_field.html' with field=form.password1 %}
+                {% include 'includes/form_field.html' with field=form.password2 %}
+
+                <button class="btn btn-primary btn-lg btn-block" type="submit">
+                    Создать аккаунт <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+                <p class="auth-terms">
+                    Создавая аккаунт, вы соглашаетесь уважать авторов и их идеи.
+                    Права на контент остаются у владельца.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

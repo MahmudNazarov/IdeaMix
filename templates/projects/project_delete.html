@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Удалить «{{ project.title }}» — IdeaMix{% endblock %}
+{% block description %}Подтверждение удаления проекта «{{ project.title }}» с платформы IdeaMix.{% endblock %}
+
+{% block content %}
+<div class="container confirm-wrap">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:project_list' %}">Проекты</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{{ project.get_absolute_url }}">{{ project.title|truncatechars:42 }}</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Удаление</span>
+    </nav>
+
+    <div class="confirm-card">
+        <span class="confirm-icon confirm-icon-danger" aria-hidden="true">
+            <i class="bi bi-trash3"></i>
+        </span>
+        <span class="eyebrow eyebrow-danger">Необратимое действие</span>
+        <h1>Удалить проект?</h1>
+        <p class="confirm-lead">
+            Проект, список участников и связи с идеями будут удалены. Сами идеи останутся
+            на платформе и не пострадают.
+        </p>
+
+        <div class="confirm-preview">
+            <span class="confirm-preview-cover confirm-preview-project">
+                <i class="bi bi-kanban" aria-hidden="true"></i>
+            </span>
+            <div>
+                <strong>{{ project.title }}</strong>
+                <span>{{ project.get_status_display }} · {{ project.member_count }} участников · {{ project.idea_count }} идей</span>
+            </div>
+        </div>
+
+        <div class="confirm-note">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            <p>Если работа приостановлена, переведите проект в статус «На паузе» вместо удаления.</p>
+        </div>
+
+        <form method="post" class="confirm-actions">
+            {% csrf_token %}
+            <a class="btn btn-ghost" href="{{ project.get_absolute_url }}">Оставить проект</a>
+            <a class="btn btn-soft" href="{% url 'ideas:project_edit' project.slug %}">
+                <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+            </a>
+            <button class="btn btn-danger" type="submit">
+                <i class="bi bi-trash3" aria-hidden="true"></i> Удалить навсегда
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

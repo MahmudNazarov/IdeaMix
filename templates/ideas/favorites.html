@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Избранное — IdeaMix{% endblock %}
+{% block description %}Идеи, которые вы сохранили на IdeaMix. Возвращайтесь к ним, чтобы поддержать авторов и создать проект.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-grid">
+            <div class="page-hero-copy">
+                <span class="eyebrow"><i class="bi bi-bookmark" aria-hidden="true"></i> Коллекция</span>
+                <h1>Избранное</h1>
+                <p>Идеи, к которым хочется вернуться. Сохраняйте лучшее и превращайте вдохновение в действие.</p>
+            </div>
+            <div class="page-hero-aside">
+                <div class="page-hero-metric">
+                    <strong>{{ page_obj.paginator.count|compact }}</strong>
+                    <span>идей в вашей коллекции</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-tight">
+    <div class="container">
+        <div class="results-head">
+            <p class="results-count">
+                {% if page_obj.paginator.count %}
+                    Сохранено: <strong>{{ page_obj.paginator.count }}</strong>
+                {% else %}
+                    Коллекция пока пуста
+                {% endif %}
+            </p>
+            <a class="results-hint results-hint-link" href="{% url 'ideas:explore' %}">
+                Найти новые идеи <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        {% if page_obj.object_list %}
+            <div class="idea-grid">
+                {% for idea in page_obj %}
+                    {% include 'includes/idea_card.html' %}
+                {% endfor %}
+            </div>
+            {% include 'includes/pagination.html' %}
+        {% else %}
+            <div class="empty-state empty-state-hero">
+                <div class="empty-visual" aria-hidden="true">
+                    <span class="empty-orb"></span>
+                    <span class="empty-float empty-float-1"><i class="bi bi-bookmark-heart"></i></span>
+                    <span class="empty-float empty-float-2"><i class="bi bi-lightbulb"></i></span>
+                    <span class="empty-float empty-float-3"><i class="bi bi-stars"></i></span>
+                </div>
+                <span class="eyebrow">Пока ничего не сохранено</span>
+                <h2>Соберите коллекцию вдохновения</h2>
+                <p>Нажмите «В избранное» на странице идеи, и она появится здесь. Это удобно, чтобы не потерять интересные задумки.</p>
+                <div class="empty-actions">
+                    <a class="btn btn-primary btn-lg" href="{% url 'ideas:explore' %}">
+                        <i class="bi bi-compass" aria-hidden="true"></i> Открыть каталог
+                    </a>
+                    <a class="btn btn-ghost btn-lg" href="{% url 'ideas:idea_create' %}">Создать свою идею</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

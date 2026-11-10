@@ -1,0 +1,46 @@
+{% load idea_extras %}
+<footer class="site-footer">
+    <div class="container footer-main">
+        <div class="footer-brand-col">
+            {% include 'includes/logo.html' %}
+            <p class="footer-tagline">Пространство, где идеи встречаются с людьми, которые их воплощают.</p>
+            <div class="footer-status"><span class="status-dot" aria-hidden="true"></span> Платформа работает</div>
+        </div>
+
+        <div class="footer-col">
+            <h3>Платформа</h3>
+            <a href="{% url 'ideas:explore' %}">Каталог идей</a>
+            <a href="{% url 'ideas:project_list' %}">Проекты</a>
+            <a href="{% url 'ideas:search' %}">Поиск</a>
+            <a href="{% url 'ideas:about' %}">Как это работает</a>
+        </div>
+
+        <div class="footer-col">
+            <h3>Категории</h3>
+            {% for category in nav_categories|slice:':5' %}
+                <a href="{% url 'ideas:explore' %}?category={{ category.slug }}">{{ category.name }}</a>
+            {% empty %}
+                <span class="footer-muted">Скоро появятся</span>
+            {% endfor %}
+        </div>
+
+        <div class="footer-col">
+            <h3>Аккаунт</h3>
+            {% if user.is_authenticated %}
+                <a href="{% url 'ideas:profile' user.username %}">Мой профиль</a>
+                <a href="{% url 'ideas:my_ideas' %}">Мои идеи</a>
+                <a href="{% url 'ideas:favorites' %}">Избранное</a>
+                <a href="{% url 'ideas:profile_edit' %}">Настройки</a>
+            {% else %}
+                <a href="{% url 'ideas:register' %}">Регистрация</a>
+                <a href="{% url 'ideas:login' %}">Вход</a>
+                <a href="{% url 'ideas:about' %}">О IdeaMix</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container footer-bottom">
+        <span>© {% now "Y" %} IdeaMix. От идеи к реальности.</span>
+        <span class="footer-made">Сделано для тех, кто создаёт будущее <i class="bi bi-stars" aria-hidden="true"></i></span>
+    </div>
+</footer>

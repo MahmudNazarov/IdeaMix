@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Каталог идей — IdeaMix{% endblock %}
+{% block description %}Исследуйте идеи сообщества IdeaMix: фильтры по категориям, статусам и тегам, сортировка по популярности и просмотрам.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-grid">
+            <div class="page-hero-copy">
+                <span class="eyebrow"><i class="bi bi-compass" aria-hidden="true"></i> Каталог</span>
+                <h1>{{ page_title }}</h1>
+                <p>{{ page_subtitle }}</p>
+            </div>
+            <div class="page-hero-aside">
+                <div class="page-hero-metric">
+                    <strong>{{ total_count|compact }}</strong>
+                    <span>идей по вашему запросу</span>
+                </div>
+            </div>
+        </div>
+
+        <form class="catalog-search" action="{% url 'ideas:explore' %}" method="get" data-skeleton-form>
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="q" value="{{ filters.q }}"
+                   placeholder="Найти идею, технологию или автора…" aria-label="Поиск идей">
+            {% if filters.category_slug %}<input type="hidden" name="category" value="{{ filters.category_slug }}">{% endif %}
+            {% if filters.status %}<input type="hidden" name="status" value="{{ filters.status }}">{% endif %}
+            {% if filters.tag %}<input type="hidden" name="tag" value="{{ filters.tag }}">{% endif %}
+            {% if filters.sort %}<input type="hidden" name="sort" value="{{ filters.sort }}">{% endif %}
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+    </div>
+</section>
+
+<section class="section section-catalog">
+    <div class="container catalog-layout">
+        {% include 'includes/sidebar.html' %}
+
+        <div class="catalog-main" id="catalogResults">
+            <div class="catalog-toolbar">
+                <div class="catalog-active">
+                    {% if filters.q %}
+                        <a class="active-filter" href="?{% url_replace q=None page=None %}">
+                            «{{ filters.q }}» <i class="bi bi-x" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                    {% if filters.category %}
+                        <a class="active-filter" href="?{% url_replace category=None page=None %}">
+                            {{ filters.category.name }} <i class="bi bi-x" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                    {% if filters.status %}
+                        <a class="active-filter" href="?{% url_replace status=None page=None %}">
+                            {% for value, label in status_choices %}{% if value == filters.status %}{{ label }}{% endif %}{% endfor %}
+                            <i class="bi bi-x" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                    {% if filters.tag %}
+                        <a class="active-filter" href="?{% url_replace tag=None page=None %}">
+                            #{{ filters.tag }} <i class="bi bi-x" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                    {% if filters.q or filters.category or filters.status or filters.tag %}
+                        <a class="clear-filters" href="{% url 'ideas:explore' %}">Сбросить всё</a>
+                    {% else %}
+                        <span class="catalog-hint"><i class="bi bi-sliders" aria-hidden="true"></i> Все опубликованные идеи</span>
+                    {% endif %}
+                </div>
+
+                <form class="sort-form" method="get" data-autosubmit>
+                    {% if filters.q %}<input type="hidden" name="q" value="{{ filters.q }}">{% endif %}
+                    {% if filters.category_slug %}<input type="hidden" name="category" value="{{ filters.category_slug }}">{% endif %}
+                    {% if filters.status %}<input type="hidden" name="status" value="{{ filters.status }}">{% endif %}
+                    {% if filters.tag %}<input type="hidden" name="tag" value="{{ filters.tag }}">{% endif %}
+                    <label for="sort" class="sort-label">Сортировать</label>
+                    <select id="sort" name="sort" class="input input-select input-sm">
+                        <option value="new" {% if filters.sort == 'new' %}selected{% endif %}>Сначала новые</option>
+                        <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>По лайкам</option>
+                        <option value="views" {% if filters.sort == 'views' %}selected{% endif %}>По просмотрам</option>
+                        <option value="old" {% if filters.sort == 'old' %}selected{% endif %}>Сначала старые</option>
+                    </select>
+                </form>
+            </div>
+
+            {% if page_obj.object_list %}
+                <div class="idea-grid idea-grid-catalog">
+                    {% for idea in page_obj %}
+                        {% include 'includes/idea_card.html' %}
+                    {% endfor %}
+                </div>
+                {% include 'includes/pagination.html' %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-visual empty-visual-sm" aria-hidden="true">
+                        <span class="empty-orb"></span>
+                        <span class="empty-float empty-float-1"><i class="bi bi-search"></i></span>
+                        <span class="empty-float empty-float-2"><i class="bi bi-lightbulb"></i></span>
+                    </div>
+                    <h2>Ничего не нашлось</h2>
+                    <p>Попробуйте изменить запрос, выбрать другую категорию или сбросить фильтры.</p>
+                    <div class="empty-actions">
+                        <a class="btn btn-ghost" href="{% url 'ideas:explore' %}">Сбросить фильтры</a>
+                        <a class="btn btn-primary"
+                           href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:register' %}{% endif %}">
+                            Создать идею
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

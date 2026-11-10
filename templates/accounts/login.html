@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Вход — IdeaMix{% endblock %}
+{% block description %}Войдите в аккаунт IdeaMix, чтобы управлять идеями, проектами и командой.{% endblock %}
+{% block main_class %}main-content main-auth{% endblock %}
+
+{% block content %}
+<div class="container auth-page">
+    <div class="auth-card auth-card-login">
+        <aside class="auth-visual">
+            <div class="auth-visual-glow" aria-hidden="true"></div>
+            <span class="eyebrow eyebrow-light"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> С возвращением</span>
+            <h2>Ваши идеи<br>уже ждут вас</h2>
+            <p>Продолжайте работу над замыслами, отвечайте на комментарии и развивайте проекты вместе с командой.</p>
+
+            <div class="auth-quote">
+                <i class="bi bi-quote" aria-hidden="true"></i>
+                <p>Лучший способ предсказать будущее — создать его вместе с теми, кто верит в ту же идею.</p>
+                <span>IdeaMix</span>
+            </div>
+
+            <div class="auth-visual-footer">
+                <span class="status-dot" aria-hidden="true"></span>
+                Платформа работает
+            </div>
+        </aside>
+
+        <div class="auth-form-side">
+            <div class="auth-form-head">
+                <span class="eyebrow">Вход в аккаунт</span>
+                <h1>Снова здравствуйте</h1>
+                <p>Нет аккаунта? <a href="{% url 'ideas:register' %}">Зарегистрироваться</a></p>
+            </div>
+
+            <form class="auth-form" method="post" novalidate>
+                {% csrf_token %}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+                {% if form.non_field_errors %}
+                    <div class="form-alert" role="alert">
+                        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+                {% include 'includes/form_field.html' with field=form.username %}
+                {% include 'includes/form_field.html' with field=form.password %}
+
+                <div class="auth-form-row">
+                    <span class="auth-hint"><i class="bi bi-shield-lock" aria-hidden="true"></i> Защищённое соединение</span>
+                    <span class="auth-hint">Пароль можно сменить в настройках</span>
+                </div>
+
+                <button class="btn btn-primary btn-lg btn-block" type="submit">
+                    Войти <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+                <p class="auth-terms">
+                    Пароль можно изменить в настройках профиля после входа.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

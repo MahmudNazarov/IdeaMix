@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Редактировать «{{ idea.title }}» — IdeaMix{% endblock %}
+{% block description %}Обновите описание, обложку, теги и статус идеи «{{ idea.title }}» на IdeaMix.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:home' %}"><i class="bi bi-house-door" aria-hidden="true"></i> Главная</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{% url 'ideas:my_ideas' %}">Мои идеи</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{{ idea.get_absolute_url }}">{{ idea.title|truncatechars:36 }}</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Редактирование</span>
+    </nav>
+
+    <section class="page-hero page-hero-compact">
+        <div>
+            <span class="eyebrow"><i class="bi bi-pencil-square" aria-hidden="true"></i> Редактирование</span>
+            <h1>Улучшите идею</h1>
+            <p>Обновите формулировки, добавьте детали или измените видимость. Изменения сразу отразятся в каталоге.</p>
+        </div>
+        <div class="page-hero-aside">
+            <div class="page-hero-metric">
+                <strong>{{ idea.created_at|date:"d.m" }}</strong>
+                <span>создана · {{ idea.views_count|compact }} просмотров</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="form-layout">
+        <form class="form-card" method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span>
+                    Основное
+                </legend>
+                {% include 'includes/form_field.html' with field=form.title %}
+                {% include 'includes/form_field.html' with field=form.short_description %}
+                {% include 'includes/form_field.html' with field=form.description %}
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.category %}
+                    {% include 'includes/form_field.html' with field=form.tags %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-blue"><i class="bi bi-image" aria-hidden="true"></i></span>
+                    Оформление
+                </legend>
+                {% if idea.cover_image %}
+                    <div class="current-cover">
+                        <img src="{{ idea.cover_image.url }}" alt="Текущая обложка идеи">
+                        <div>
+                            <strong>Текущая обложка</strong>
+                            <span>Загрузите новое изображение, чтобы заменить её.</span>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="upload-box">
+                    {% include 'includes/form_field.html' with field=form.cover_image %}
+                    <div class="upload-preview" id="coverPreview" hidden>
+                        <img alt="Предпросмотр обложки">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-cyan"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                    Публикация
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.status %}
+                    {% include 'includes/form_field.html' with field=form.visibility %}
+                </div>
+            </fieldset>
+
+            <div class="form-actions form-actions-split">
+                <div class="form-actions-main">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Сохранить изменения
+                    </button>
+                    <a class="btn btn-ghost" href="{{ idea.get_absolute_url }}">Отмена</a>
+                </div>
+                <a class="btn btn-danger-soft" href="{% url 'ideas:idea_delete' idea.slug %}">
+                    <i class="bi bi-trash3" aria-hidden="true"></i> Удалить
+                </a>
+            </div>
+        </form>
+
+        <aside class="form-aside">
+            <div class="side-card author-card">
+                <div class="author-card-head">
+                    <span class="avatar avatar-md">
+                        {% if idea.author.profile.avatar %}
+                            <img src="{{ idea.author.profile.avatar.url }}" alt="">
+                        {% else %}
+                            <span>{{ idea.author|initials }}</span>
+                        {% endif %}
+                    </span>
+                    <div>
+                        <span class="author-name">{{ idea.author.get_full_name|default:idea.author.username }}</span>
+                        <span class="author-handle">@{{ idea.author.username }}</span>
+                    </div>
+                </div>
+                <dl class="mini-facts">
+                    <div><dt>Статус</dt><dd>{{ idea.get_status_display }}</dd></div>
+                    <div><dt>Видимость</dt><dd>{{ idea.get_visibility_display }}</dd></div>
+                    <div><dt>Обновлена</dt><dd>{{ idea.updated_at|date:"d.m.Y H:i" }}</dd></div>
+                </dl>
+                <a class="btn btn-ghost btn-sm btn-block" href="{{ idea.get_absolute_url }}">
+                    <i class="bi bi-eye" aria-hidden="true"></i> Открыть публичную страницу
+                </a>
+            </div>
+            <div class="side-card side-note">
+                <span class="side-cta-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+                <h2>Черновики не видны другим</h2>
+                <p>Даже публичная идея в статусе «Черновик» доступна только вам в разделе «Мои идеи».</p>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

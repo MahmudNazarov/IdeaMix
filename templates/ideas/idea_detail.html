@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}{{ idea.title }} — IdeaMix{% endblock %}
+{% block description %}{{ idea.short_description|default:idea.description|striptags|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ idea.title }} — IdeaMix{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:home' %}"><i class="bi bi-house-door" aria-hidden="true"></i> Главная</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{% url 'ideas:explore' %}">Идеи</a>
+        {% if idea.category %}
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <a href="{% url 'ideas:explore' %}?category={{ idea.category.slug }}">{{ idea.category.name }}</a>
+        {% endif %}
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>{{ idea.title|truncatechars:42 }}</span>
+    </nav>
+</div>
+
+<section class="section section-detail">
+    <div class="container detail-layout">
+        <article class="detail-main">
+            <header class="detail-head">
+                <div class="detail-badges">
+                    {% if idea.category %}
+                        <a class="category-label category-label-lg" href="{% url 'ideas:explore' %}?category={{ idea.category.slug }}">
+                            <i class="bi {{ idea.category.icon }}" aria-hidden="true"></i> {{ idea.category.name }}
+                        </a>
+                    {% endif %}
+                    <span class="status-pill status-{{ idea.status }}">{{ idea.get_status_display }}</span>
+                    {% if idea.is_private %}
+                        <span class="private-pill"><i class="bi bi-lock-fill" aria-hidden="true"></i> Приватная идея</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="detail-title">{{ idea.title }}</h1>
+                <p class="detail-lead">{{ idea.short_description }}</p>
+
+                <div class="detail-meta">
+                    <a class="author-mini author-mini-lg" href="{% url 'ideas:profile' idea.author.username %}">
+                        <span class="avatar avatar-sm">
+                            {% if idea.author.profile.avatar %}
+                                <img src="{{ idea.author.profile.avatar.url }}" alt="">
+                            {% else %}
+                                <span>{{ idea.author|initials }}</span>
+                            {% endif %}
+                        </span>
+                        <span class="author-meta">
+                            <strong>{{ idea.author.get_full_name|default:idea.author.username }}</strong>
+                            <span>@{{ idea.author.username }}</span>
+                        </span>
+                    </a>
+                    <span class="meta-sep" aria-hidden="true"></span>
+                    <span class="meta-item"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ idea.created_at|date:"d.m.Y" }}</span>
+                    <span class="meta-item"><i class="bi bi-eye" aria-hidden="true"></i> {{ idea.views_count|compact }} просмотров</span>
+                    <span class="meta-item"><i class="bi bi-chat-dots" aria-hidden="true"></i> {{ idea.comment_count }} комментариев</span>
+                </div>
+            </header>
+
+            {% if idea.cover_image %}
+                <figure class="detail-cover">
+                    <img src="{{ idea.cover_image.url }}" alt="Обложка идеи «{{ idea.title }}»">
+                </figure>
+            {% endif %}
+
+            <div class="detail-body prose">
+                {{ idea.description|linebreaks }}
+            </div>
+
+            {% if idea.tags_list %}
+                <div class="detail-tags">
+                    {% for tag in idea.tags_list %}
+                        <a class="tag-chip" href="{% url 'ideas:explore' %}?tag={{ tag|urlencode }}">#{{ tag }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="reactions" id="reactions">
+                <form action="{% url 'ideas:idea_like' idea.slug %}" method="post" data-reaction data-kind="like">
+                    {% csrf_token %}
+                    <button type="submit" class="reaction-btn {% if liked %}active{% endif %}"
+                            aria-pressed="{{ liked|yesno:'true,false' }}" aria-label="Поставить лайк">
+                        <span class="reaction-icon" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+                        <span class="reaction-count" data-count>{{ idea.like_count }}</span>
+                        <span class="reaction-label">{% if liked %}Вам нравится{% else %}Нравится{% endif %}</span>
+                    </button>
+                </form>
+                <form action="{% url 'ideas:idea_favorite' idea.slug %}" method="post" data-reaction data-kind="favorite">
+                    {% csrf_token %}
+                    <button type="submit" class="reaction-btn {% if favorited %}active{% endif %}"
+                            aria-pressed="{{ favorited|yesno:'true,false' }}" aria-label="Добавить в избранное">
+                        <span class="reaction-icon" aria-hidden="true"><i class="bi bi-bookmark-fill"></i></span>
+                        <span class="reaction-count" data-count>{{ idea.favorite_count }}</span>
+                        <span class="reaction-label">{% if favorited %}В избранном{% else %}В избранное{% endif %}</span>
+                    </button>
+                </form>
+                <button type="button" class="reaction-btn reaction-btn-quiet" data-copy="{{ request.build_absolute_uri }}">
+                    <span class="reaction-icon" aria-hidden="true"><i class="bi bi-link-45deg"></i></span>
+                    <span class="reaction-label">Скопировать ссылку</span>
+                </button>
+
+                {% if can_edit %}
+                    <div class="owner-actions">
+                        <a class="btn btn-ghost btn-sm" href="{% url 'ideas:idea_edit' idea.slug %}">
+                            <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+                        </a>
+                        <a class="btn btn-danger-soft btn-sm" href="{% url 'ideas:idea_delete' idea.slug %}">
+                            <i class="bi bi-trash3" aria-hidden="true"></i> Удалить
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <section class="comments" id="comments" aria-labelledby="comments-title">
+                <div class="comments-head">
+                    <h2 id="comments-title">Комментарии <span>{{ idea.comment_count }}</span></h2>
+                    <span class="comments-sort"><i class="bi bi-clock-history" aria-hidden="true"></i> Сначала ранние</span>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <form class="comment-composer" method="post" action="{{ idea.get_absolute_url }}">
+                        {% csrf_token %}
+                        <span class="avatar avatar-sm composer-avatar">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}" alt="">
+                            {% else %}
+                                <span>{{ user|initials }}</span>
+                            {% endif %}
+                        </span>
+                        <div class="composer-body">
+                            <label for="{{ comment_form.text.id_for_label }}" class="sr-only">Комментарий</label>
+                            {{ comment_form.text }}
+                            {% for error in comment_form.text.errors %}
+                                <p class="field-error">{{ error }}</p>
+                            {% endfor %}
+                            <div class="composer-footer">
+                                <span class="char-counter" data-counter-for="{{ comment_form.text.id_for_label }}">0 / 1000</span>
+                                <button class="btn btn-primary btn-sm" type="submit">
+                                    <i class="bi bi-send" aria-hidden="true"></i> Отправить
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="login-prompt">
+                        <span class="login-prompt-icon"><i class="bi bi-chat-dots" aria-hidden="true"></i></span>
+                        <div>
+                            <strong>Хотите присоединиться к обсуждению?</strong>
+                            <p><a href="{% url 'ideas:login' %}?next={{ request.path|urlencode }}">Войдите</a> или
+                                <a href="{% url 'ideas:register' %}">создайте аккаунт</a>, чтобы оставить комментарий.</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if comments %}
+                    <ul class="comment-list">
+                        {% for comment in comments %}
+                            <li class="comment" id="comment-{{ comment.pk }}">
+                                <span class="avatar avatar-sm">
+                                    {% if comment.author.profile.avatar %}
+                                        <img src="{{ comment.author.profile.avatar.url }}" alt="">
+                                    {% else %}
+                                        <span>{{ comment.author|initials }}</span>
+                                    {% endif %}
+                                </span>
+                                <div class="comment-content">
+                                    <div class="comment-head">
+                                        <a href="{% url 'ideas:profile' comment.author.username %}">
+                                            <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                                        </a>
+                                        <span class="comment-username">@{{ comment.author.username }}</span>
+                                        <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"d.m.Y H:i" }}</time>
+                                        {% if comment.was_edited %}<span class="comment-edited">изменён</span>{% endif %}
+                                    </div>
+                                    <p class="comment-text">{{ comment.text|linebreaksbr }}</p>
+                                    {% if comment.author == user %}
+                                        <div class="comment-actions">
+                                            <a href="{% url 'ideas:comment_edit' comment.pk %}">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+                                            </a>
+                                            <form method="post" action="{% url 'ideas:comment_delete' comment.pk %}"
+                                                  class="inline-form" data-confirm="Удалить этот комментарий? Это действие нельзя отменить.">
+                                                {% csrf_token %}
+                                                <button type="submit" class="link-danger">
+                                                    <i class="bi bi-trash3" aria-hidden="true"></i> Удалить
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="comments-empty">
+                        <i class="bi bi-chat-square-text" aria-hidden="true"></i>
+                        <p>Комментариев пока нет. Будьте первым, кто поддержит идею!</p>
+                    </div>
+                {% endif %}
+            </section>
+        </article>
+
+        <aside class="detail-side">
+            <div class="side-card author-card">
+                <div class="author-card-head">
+                    <a class="avatar avatar-lg" href="{% url 'ideas:profile' idea.author.username %}">
+                        {% if idea.author.profile.avatar %}
+                            <img src="{{ idea.author.profile.avatar.url }}" alt="">
+                        {% else %}
+                            <span>{{ idea.author|initials }}</span>
+                        {% endif %}
+                    </a>
+                    <div>
+                        <a class="author-name" href="{% url 'ideas:profile' idea.author.username %}">
+                            {{ idea.author.get_full_name|default:idea.author.username }}
+                        </a>
+                        <span class="author-handle">@{{ idea.author.username }}</span>
+                    </div>
+                </div>
+                {% if idea.author.profile.bio %}
+                    <p class="author-bio">{{ idea.author.profile.bio|truncatechars:160 }}</p>
+                {% endif %}
+                {% if idea.author.profile.skills_list %}
+                    <div class="author-skills">
+                        {% for skill in idea.author.profile.skills_list|slice:':4' %}
+                            <span class="skill-chip">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <a class="btn btn-ghost btn-sm btn-block" href="{% url 'ideas:profile' idea.author.username %}">
+                    Открыть профиль
+                </a>
+            </div>
+
+            <div class="side-card side-stats">
+                <h2>Отклик сообщества</h2>
+                <div class="side-stat-row">
+                    <div><strong>{{ idea.like_count }}</strong><span>лайков</span></div>
+                    <div><strong>{{ idea.favorite_count }}</strong><span>в избранном</span></div>
+                    <div><strong>{{ idea.comment_count }}</strong><span>комментариев</span></div>
+                </div>
+            </div>
+
+            {% if related_projects %}
+                <div class="side-card">
+                    <div class="side-card-head">
+                        <h2>Проекты по идее</h2>
+                    </div>
+                    <div class="side-project-list">
+                        {% for project in related_projects %}
+                            <a class="side-project" href="{{ project.get_absolute_url }}">
+                                <span class="side-project-icon"><i class="bi bi-kanban" aria-hidden="true"></i></span>
+                                <span>
+                                    <strong>{{ project.title }}</strong>
+                                    <small>{{ project.get_status_display }} · {{ project.member_count }} участников</small>
+                                </span>
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elif can_edit %}
+                <div class="side-card side-cta">
+                    <span class="side-cta-icon"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i></span>
+                    <h2>Превратите идею в проект</h2>
+                    <p>Создайте проект, свяжите его с этой идеей и пригласите команду.</p>
+                    <a class="btn btn-primary btn-sm btn-block" href="{% url 'ideas:project_create' %}?idea={{ idea.pk }}">
+                        Создать проект
+                    </a>
+                </div>
+            {% endif %}
+
+            {% if related_ideas %}
+                <div class="side-card">
+                    <div class="side-card-head"><h2>Похожие идеи</h2></div>
+                    <div class="side-idea-list">
+                        {% for related in related_ideas %}
+                            <a class="side-idea" href="{{ related.get_absolute_url }}">
+                                <span class="side-idea-cover">
+                                    {% if related.cover_image %}
+                                        <img src="{{ related.cover_image.url }}" alt="">
+                                    {% else %}
+                                        <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                                    {% endif %}
+                                </span>
+                                <span>
+                                    <strong>{{ related.title|truncatechars:48 }}</strong>
+                                    <small><i class="bi bi-heart" aria-hidden="true"></i> {{ related.like_count }} · {{ related.author.username }}</small>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</section>
+{% endblock %}

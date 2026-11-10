@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static idea_extras %}
+
+{% block title %}IdeaMix — любая большая идея начинается с мысли{% endblock %}
+{% block description %}IdeaMix — пространство для идей, команд и проектов. Делитесь задумками, находите единомышленников и превращайте идеи в реальность.{% endblock %}
+{% block main_class %}main-content main-home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Пространство идей и команд</span>
+            <h1 class="hero-title">
+                Любая большая идея
+                <span class="hero-gradient">начинается с мысли</span>
+            </h1>
+            <p class="hero-lead">
+                Делись идеями, находи единомышленников и превращай свои задумки
+                в реальные проекты вместе с IdeaMix.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" href="{% url 'ideas:explore' %}">
+                    <i class="bi bi-compass" aria-hidden="true"></i> Исследовать идеи
+                </a>
+                <a class="btn btn-soft btn-lg"
+                   href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:register' %}{% endif %}">
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i> Поделиться идеей
+                </a>
+            </div>
+            <div class="hero-social-proof">
+                <div class="proof-avatars" aria-hidden="true">
+                    <span class="proof-avatar proof-avatar-1"><i class="bi bi-person-fill"></i></span>
+                    <span class="proof-avatar proof-avatar-2"><i class="bi bi-person-fill"></i></span>
+                    <span class="proof-avatar proof-avatar-3"><i class="bi bi-person-fill"></i></span>
+                    <span class="proof-avatar proof-avatar-4"><i class="bi bi-plus"></i></span>
+                </div>
+                <p>
+                    <strong>{{ stats.users|compact }}</strong> участников уже создают
+                    <strong>{{ stats.ideas|compact }}</strong> идей
+                </p>
+            </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <div class="hero-orb">
+                <span class="orb-ring orb-ring-1"></span>
+                <span class="orb-ring orb-ring-2"></span>
+                <span class="orb-ring orb-ring-3"></span>
+                <span class="orb-core">
+                    <img src="{% static 'img/logo-mark.svg' %}" alt="" width="64" height="64">
+                </span>
+                <span class="orb-node orb-node-1"></span>
+                <span class="orb-node orb-node-2"></span>
+                <span class="orb-node orb-node-3"></span>
+            </div>
+            <div class="hero-float hero-float-idea">
+                <span class="float-icon"><i class="bi bi-lightbulb"></i></span>
+                <div>
+                    <strong>Новая идея</strong>
+                    <span>Черновик сохранён</span>
+                </div>
+                <span class="float-status">идея</span>
+            </div>
+            <div class="hero-float hero-float-team">
+                <div class="float-avatars">
+                    <span>А</span><span>М</span><span>+</span>
+                </div>
+                <div>
+                    <strong>Команда собрана</strong>
+                    <span>3 участника</span>
+                </div>
+            </div>
+            <div class="hero-float hero-float-launch">
+                <span class="float-icon float-icon-blue"><i class="bi bi-rocket-takeoff"></i></span>
+                <div>
+                    <strong>Проект запущен</strong>
+                    <span>От идеи к реальности</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <strong>{{ stats.ideas|compact }}</strong>
+                <span>опубликованных идей</span>
+            </div>
+            <div class="hero-stat">
+                <strong>{{ stats.users|compact }}</strong>
+                <span>участников сообщества</span>
+            </div>
+            <div class="hero-stat">
+                <strong>{{ stats.projects|compact }}</strong>
+                <span>проектов в работе</span>
+            </div>
+            <div class="hero-stat">
+                <strong>{{ stats.likes|compact }}</strong>
+                <span>поддержанных идей</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if has_ideas %}
+    <section class="section section-popular">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <span class="section-eyebrow"><i class="bi bi-fire" aria-hidden="true"></i> Выбор сообщества</span>
+                    <h2>Идеи, которые вдохновляют</h2>
+                    <p>Самые обсуждаемые и поддерживаемые идеи платформы.</p>
+                </div>
+                <a class="section-link" href="{% url 'ideas:explore' %}?sort=popular">
+                    Все популярные <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="idea-grid">
+                {% for idea in popular_ideas %}
+                    {% include 'includes/idea_card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% else %}
+    <section class="section">
+        <div class="container">
+            <div class="empty-state empty-state-hero">
+                <div class="empty-visual" aria-hidden="true">
+                    <span class="empty-orb"></span>
+                    <span class="empty-float empty-float-1"><i class="bi bi-lightbulb"></i></span>
+                    <span class="empty-float empty-float-2"><i class="bi bi-people"></i></span>
+                    <span class="empty-float empty-float-3"><i class="bi bi-rocket"></i></span>
+                </div>
+                <span class="eyebrow">Здесь пока тихо</span>
+                <h2>Станьте автором первой идеи</h2>
+                <p>Опубликуйте задумку, соберите обратную связь и найдите людей, готовых помочь с реализацией.</p>
+                <a class="btn btn-primary btn-lg"
+                   href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:register' %}{% endif %}">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Создать первую идею
+                </a>
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<section class="section section-categories">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="section-eyebrow"><i class="bi bi-grid" aria-hidden="true"></i> Направления</span>
+                <h2>Найдите свою категорию</h2>
+                <p>От технологий и дизайна до экологии и игр — идеям есть где встретиться.</p>
+            </div>
+            <a class="section-link" href="{% url 'ideas:explore' %}">
+                Все категории <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+        <div class="category-grid">
+            {% for category in categories %}
+                <a class="category-card" href="{% url 'ideas:explore' %}?category={{ category.slug }}" data-reveal>
+                    <span class="category-icon"><i class="bi {{ category.icon }}" aria-hidden="true"></i></span>
+                    <div class="category-card-body">
+                        <h3>{{ category.name }}</h3>
+                        <p>{{ category.description|default:'Идеи и проекты этого направления.'|truncatechars:70 }}</p>
+                    </div>
+                    <span class="category-count">{{ category.idea_count }} <small>идей</small></span>
+                    <i class="bi bi-arrow-up-right category-arrow" aria-hidden="true"></i>
+                </a>
+            {% empty %}
+                <div class="empty-inline">Категории появятся после первого запуска платформы.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section section-how">
+    <div class="container">
+        <div class="section-head section-head-center">
+            <div>
+                <span class="section-eyebrow"><i class="bi bi-signpost-split" aria-hidden="true"></i> Как это работает</span>
+                <h2>От мысли до работающего проекта</h2>
+                <p>Четыре шага, которые помогают идее найти команду и воплощение.</p>
+            </div>
+        </div>
+        <div class="steps-grid">
+            <article class="step-card" data-reveal>
+                <span class="step-number">01</span>
+                <span class="step-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+                <h3>Поделитесь идеей</h3>
+                <p>Опишите задумку, добавьте теги и обложку. Сохраните как черновик или опубликуйте сразу.</p>
+            </article>
+            <article class="step-card" data-reveal>
+                <span class="step-number">02</span>
+                <span class="step-icon step-icon-blue"><i class="bi bi-chat-dots" aria-hidden="true"></i></span>
+                <h3>Получите отклик</h3>
+                <p>Собирайте лайки, комментарии и взгляд со стороны — сообщество поможет усилить идею.</p>
+            </article>
+            <article class="step-card" data-reveal>
+                <span class="step-number">03</span>
+                <span class="step-icon step-icon-cyan"><i class="bi bi-people" aria-hidden="true"></i></span>
+                <h3>Найдите команду</h3>
+                <p>Создайте проект, укажите нужных специалистов и пригласите единомышленников.</p>
+            </article>
+            <article class="step-card" data-reveal>
+                <span class="step-number">04</span>
+                <span class="step-icon step-icon-green"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i></span>
+                <h3>Запустите проект</h3>
+                <p>Ведите проект от планирования до релиза и отмечайте прогресс вместе с командой.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+{% if projects %}
+    <section class="section section-projects">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <span class="section-eyebrow"><i class="bi bi-kanban" aria-hidden="true"></i> Новые проекты</span>
+                    <h2>Идеи, которые уже стали делом</h2>
+                    <p>Команды, которые перешли от обсуждения к созданию продукта.</p>
+                </div>
+                <a class="section-link" href="{% url 'ideas:project_list' %}">
+                    Все проекты <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="project-grid">
+                {% for project in projects %}
+                    {% include 'includes/project_card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+{% if has_ideas %}
+    <section class="section section-recent">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <span class="section-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i> Свежее</span>
+                    <h2>Недавно опубликованные</h2>
+                    <p>Новые мысли сообщества — поддержите авторов первыми.</p>
+                </div>
+                <a class="section-link" href="{% url 'ideas:explore' %}">
+                    Смотреть все <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="idea-grid">
+                {% for idea in recent_ideas %}
+                    {% include 'includes/idea_card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+<section class="section section-cta">
+    <div class="container">
+        <div class="cta-panel" data-reveal>
+            <div class="cta-glow" aria-hidden="true"></div>
+            <div class="cta-content">
+                <span class="eyebrow eyebrow-light">Присоединяйтесь</span>
+                <h2>Ваша идея заслуживает<br>стать реальностью</h2>
+                <p>Создайте аккаунт, поделитесь задумкой и найдите людей, которые помогут её воплотить.</p>
+                <div class="cta-actions">
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-light btn-lg" href="{% url 'ideas:idea_create' %}">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i> Создать идею
+                        </a>
+                        <a class="btn btn-outline-light btn-lg" href="{% url 'ideas:explore' %}">Исследовать идеи</a>
+                    {% else %}
+                        <a class="btn btn-light btn-lg" href="{% url 'ideas:register' %}">
+                            Создать аккаунт <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a class="btn btn-outline-light btn-lg" href="{% url 'ideas:login' %}">У меня уже есть аккаунт</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="cta-visual" aria-hidden="true">
+                <div class="cta-card cta-card-1">
+                    <i class="bi bi-lightbulb"></i>
+                    <span>Идея</span>
+                </div>
+                <div class="cta-line"></div>
+                <div class="cta-card cta-card-2">
+                    <i class="bi bi-people"></i>
+                    <span>Команда</span>
+                </div>
+                <div class="cta-line"></div>
+                <div class="cta-card cta-card-3">
+                    <i class="bi bi-rocket-takeoff"></i>
+                    <span>Проект</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

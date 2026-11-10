@@ -1,0 +1,52 @@
+{% load idea_extras %}
+<article class="project-card" data-reveal>
+    <div class="project-card-top">
+        <span class="status-pill status-{{ project.status }}">{{ project.get_status_display }}</span>
+        {% if project.category %}
+            <a class="category-label" href="{% url 'ideas:project_list' %}?category={{ project.category.slug }}">
+                <i class="bi {{ project.category.icon }}" aria-hidden="true"></i> {{ project.category.name }}
+            </a>
+        {% endif %}
+        {% if project.is_private %}
+            <span class="private-pill"><i class="bi bi-lock-fill" aria-hidden="true"></i> Приватный</span>
+        {% endif %}
+    </div>
+
+    <h3 class="project-card-title"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
+    <p class="project-card-excerpt">{{ project.description|striptags|truncatechars:150 }}</p>
+
+    {% if project.technologies_list %}
+        <div class="tech-row">
+            {% for tech in project.technologies_list|slice:':4' %}
+                <span class="tech-chip">{{ tech }}</span>
+            {% endfor %}
+            {% if project.technologies_list|length > 4 %}
+                <span class="tech-chip tech-chip-more">+{{ project.technologies_list|length|add:'-4' }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if project.needed_specialists_list %}
+        <div class="project-need">
+            <i class="bi bi-person-plus" aria-hidden="true"></i>
+            Ищем: {{ project.needed_specialists_list|join:", " }}
+        </div>
+    {% endif %}
+
+    <div class="project-card-footer">
+        <a class="author-mini" href="{% url 'ideas:profile' project.creator.username %}">
+            <span class="avatar avatar-xs">
+                {% if project.creator.profile.avatar %}
+                    <img src="{{ project.creator.profile.avatar.url }}" alt="">
+                {% else %}
+                    <span>{{ project.creator|initials }}</span>
+                {% endif %}
+            </span>
+            <span>@{{ project.creator.username }}</span>
+        </a>
+        <div class="project-card-stats">
+            <span><i class="bi bi-people" aria-hidden="true"></i> {{ project.member_count|default:0 }}</span>
+            <span><i class="bi bi-lightbulb" aria-hidden="true"></i> {{ project.idea_count|default:0 }}</span>
+        </div>
+    </div>
+</article>

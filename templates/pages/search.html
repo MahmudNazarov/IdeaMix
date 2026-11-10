@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}{% if query %}Поиск: {{ query }} — {% endif %}IdeaMix{% endblock %}
+{% block description %}Поиск идей, авторов, тегов и категорий на IdeaMix.{% endblock %}
+
+{% block content %}
+<section class="page-hero page-hero-search">
+    <div class="container">
+        <div class="search-hero">
+            <span class="eyebrow"><i class="bi bi-search" aria-hidden="true"></i> Поиск</span>
+            <h1>{% if query %}Результаты по запросу «{{ query }}»{% else %}Что ищем сегодня?{% endif %}</h1>
+            <p>{% if query %}Найдено {{ total_count|compact }} идей. Уточните запрос или откройте подходящую категорию.{% else %}Найдите идею, автора, технологию или тему, которая вас вдохновит.{% endif %}</p>
+            <form class="search-hero-form" action="{% url 'ideas:search' %}" method="get" data-skeleton-form>
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="search" name="q" value="{{ query }}" placeholder="Например: экология, AI, мобильное приложение" aria-label="Поисковый запрос" autofocus>
+                <button class="btn btn-primary" type="submit">Искать</button>
+            </form>
+            <div class="search-suggestions">
+                <span>Популярное:</span>
+                {% for tag in popular_tags|slice:':5' %}
+                    <a class="tag-chip" href="{% url 'ideas:search' %}?q={{ tag.name|urlencode }}">#{{ tag.name }}</a>
+                {% empty %}
+                    <a class="tag-chip" href="{% url 'ideas:explore' %}">Все идеи</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-catalog">
+    <div class="container search-layout">
+        <div class="search-main" id="catalogResults">
+            {% if query %}
+                <div class="catalog-toolbar">
+                    <div class="catalog-active">
+                        <span class="catalog-hint">Найдено: <strong>{{ total_count }}</strong></span>
+                    </div>
+                    <a class="section-link" href="{% url 'ideas:search' %}">Новый запрос <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                {% if page_obj.object_list %}
+                    <div class="idea-grid idea-grid-search">
+                        {% for idea in page_obj %}
+                            {% include 'includes/idea_card.html' %}
+                        {% endfor %}
+                    </div>
+                    {% include 'includes/pagination.html' %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-visual empty-visual-sm" aria-hidden="true">
+                            <span class="empty-orb"></span>
+                            <span class="empty-float empty-float-1"><i class="bi bi-search"></i></span>
+                            <span class="empty-float empty-float-2"><i class="bi bi-emoji-neutral"></i></span>
+                        </div>
+                        <h2>По запросу «{{ query }}» ничего не найдено</h2>
+                        <p>Проверьте написание или попробуйте более общий запрос. Например, «дизайн» или «AI».</p>
+                        <div class="empty-actions">
+                            <a class="btn btn-ghost" href="{% url 'ideas:explore' %}">Открыть каталог</a>
+                            <a class="btn btn-primary"
+                               href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:register' %}{% endif %}">
+                                Создать идею
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="search-start">
+                    <div class="search-start-head">
+                        <h2>Исследуйте по категориям</h2>
+                        <a class="section-link" href="{% url 'ideas:explore' %}">Весь каталог <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                    <div class="search-category-grid">
+                        {% for category in categories %}
+                            <a class="search-category" href="{% url 'ideas:explore' %}?category={{ category.slug }}">
+                                <span class="category-icon"><i class="bi {{ category.icon }}" aria-hidden="true"></i></span>
+                                <span>
+                                    <strong>{{ category.name }}</strong>
+                                    <small>{{ category.idea_count }} идей</small>
+                                </span>
+                                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <aside class="search-side">
+            <div class="sidebar-card">
+                <div class="sidebar-head"><h2>Категории</h2></div>
+                <nav class="sidebar-list">
+                    {% for category in categories %}
+                        <a class="sidebar-item" href="{% url 'ideas:explore' %}?category={{ category.slug }}">
+                            <span><i class="bi {{ category.icon }}" aria-hidden="true"></i> {{ category.name }}</span>
+                            <span class="sidebar-count">{{ category.idea_count }}</span>
+                        </a>
+                    {% endfor %}
+                </nav>
+            </div>
+            {% if popular_tags %}
+                <div class="sidebar-card">
+                    <div class="sidebar-head"><h2>Теги</h2></div>
+                    <div class="tag-cloud">
+                        {% for tag in popular_tags %}
+                            <a class="tag-chip" href="{% url 'ideas:search' %}?q={{ tag.name|urlencode }}">#{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</section>
+{% endblock %}

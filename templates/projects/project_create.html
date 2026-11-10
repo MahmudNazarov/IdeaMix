@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Новый проект — IdeaMix{% endblock %}
+{% block description %}Создайте проект на IdeaMix: свяжите его с идеей, укажите технологии и нужных специалистов.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:home' %}"><i class="bi bi-house-door" aria-hidden="true"></i> Главная</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{% url 'ideas:project_list' %}">Проекты</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Новый проект</span>
+    </nav>
+
+    <section class="page-hero page-hero-compact">
+        <div>
+            <span class="eyebrow"><i class="bi bi-rocket-takeoff" aria-hidden="true"></i> Новая команда</span>
+            <h1>Создайте проект</h1>
+            <p>Опишите цель, укажите технологии и специалистов, которых не хватает. Проект можно связать с вашей идеей.</p>
+        </div>
+        <div class="page-hero-aside">
+            <div class="page-hero-metric">
+                <strong>01</strong>
+                <span>проект — одна общая цель</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="form-layout">
+        <form class="form-card" method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-flag" aria-hidden="true"></i></span>
+                    О проекте
+                </legend>
+                {% include 'includes/form_field.html' with field=form.title %}
+                {% include 'includes/form_field.html' with field=form.description %}
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.category %}
+                    {% include 'includes/form_field.html' with field=form.related_idea %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-blue"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    Команда и технологии
+                </legend>
+                {% include 'includes/form_field.html' with field=form.technologies %}
+                {% include 'includes/form_field.html' with field=form.needed_specialists %}
+                {% include 'includes/form_field.html' with field=form.is_open %}
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-cyan"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+                    Ссылки
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.repository_url %}
+                    {% include 'includes/form_field.html' with field=form.demo_url %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                    Публикация
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.status %}
+                    {% include 'includes/form_field.html' with field=form.visibility %}
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-check2" aria-hidden="true"></i> Создать проект
+                </button>
+                <a class="btn btn-ghost" href="{% url 'ideas:project_list' %}">Отмена</a>
+            </div>
+        </form>
+
+        <aside class="form-aside">
+            <div class="side-card">
+                <div class="side-card-head"><h2>Что делает проект заметным</h2></div>
+                <ul class="tip-list">
+                    <li>
+                        <span class="tip-icon"><i class="bi bi-bullseye" aria-hidden="true"></i></span>
+                        <span><strong>Ясная цель</strong>Опишите, какой результат хотите получить.</span>
+                    </li>
+                    <li>
+                        <span class="tip-icon tip-icon-blue"><i class="bi bi-code-slash" aria-hidden="true"></i></span>
+                        <span><strong>Технологии</strong>Перечислите стек — это помогает найти подходящих людей.</span>
+                    </li>
+                    <li>
+                        <span class="tip-icon tip-icon-cyan"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
+                        <span><strong>Нужные роли</strong>Скажите, кого не хватает в команде.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="side-card side-note">
+                <span class="side-cta-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+                <h2>Сначала была идея?</h2>
+                <p>Выберите свою идею в поле «Связанная идея» — она автоматически появится в проекте.</p>
+                <a class="btn btn-ghost btn-sm btn-block" href="{% url 'ideas:my_ideas' %}">Мои идеи</a>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

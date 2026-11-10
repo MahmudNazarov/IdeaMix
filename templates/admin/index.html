@@ -1,0 +1,543 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static l10n admin_dashboard %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .imx-dashboard {
+      margin: 0 0 28px;
+    }
+
+    .imx-dashboard__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .imx-dashboard__title {
+      margin: 0 0 4px;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--body-loud-color);
+    }
+
+    .imx-dashboard__subtitle {
+      margin: 0;
+      color: var(--body-quiet-color);
+      font-size: 0.85rem;
+    }
+
+    .imx-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      background: var(--message-success-bg);
+      color: var(--body-fg);
+    }
+
+    .imx-pill--off {
+      background: var(--message-error-bg);
+    }
+
+    .imx-pill i {
+      font-size: 0.95rem;
+    }
+
+    .imx-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .imx-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid var(--hairline-color);
+      border-radius: 12px;
+      background: var(--body-bg);
+    }
+
+    .imx-card__head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .imx-card__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 10px;
+      background: var(--selected-bg);
+      color: var(--link-fg);
+      font-size: 1.1rem;
+    }
+
+    .imx-card__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--body-loud-color);
+    }
+
+    .imx-card__actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      font-size: 0.78rem;
+    }
+
+    .imx-card__actions a {
+      color: var(--link-fg);
+      text-decoration: none;
+    }
+
+    .imx-card__actions a:hover,
+    .imx-card__actions a:focus-visible {
+      color: var(--link-hover-color);
+      text-decoration: underline;
+    }
+
+    .imx-card__add {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .imx-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .imx-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 12px;
+      border: 1px solid var(--hairline-color);
+      border-radius: 9px;
+      background: var(--darkened-bg);
+      color: var(--body-fg);
+      text-decoration: none;
+    }
+
+    a.imx-metric:hover,
+    a.imx-metric:focus-visible {
+      border-color: var(--link-fg);
+      color: var(--body-fg);
+      text-decoration: none;
+    }
+
+    .imx-metric__value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--body-loud-color);
+    }
+
+    .imx-metric__label {
+      font-size: 0.78rem;
+      color: var(--body-quiet-color);
+    }
+
+    .imx-metric__hint {
+      font-size: 0.72rem;
+      color: var(--link-fg);
+    }
+
+    .imx-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0;
+      padding: 12px 0 0;
+      border-top: 1px solid var(--hairline-color);
+      list-style: none;
+      font-size: 0.8rem;
+    }
+
+    .imx-details li {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--body-quiet-color);
+    }
+
+    .imx-details strong {
+      color: var(--body-fg);
+      font-weight: 600;
+    }
+
+    .imx-online {
+      margin-bottom: 16px;
+      padding: 18px;
+      border: 1px solid var(--hairline-color);
+      border-radius: 12px;
+      background: var(--body-bg);
+    }
+
+    .imx-online__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .imx-online__title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--body-loud-color);
+    }
+
+    .imx-online__title i {
+      color: var(--link-fg);
+      font-size: 1.1rem;
+    }
+
+    .imx-online__subtitle {
+      margin: 0;
+      color: var(--body-quiet-color);
+      font-size: 0.78rem;
+    }
+
+    .imx-online__stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .imx-online__stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 100px;
+      padding: 8px 14px;
+      border: 1px solid var(--hairline-color);
+      border-radius: 9px;
+      background: var(--darkened-bg);
+    }
+
+    .imx-online__stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--body-loud-color);
+    }
+
+    .imx-online__stat-label {
+      font-size: 0.72rem;
+      color: var(--body-quiet-color);
+    }
+
+    .imx-online__stat--accent {
+      border-color: var(--link-fg);
+      background: var(--selected-bg);
+    }
+
+    .imx-online__stat--accent .imx-online__stat-value {
+      color: var(--link-fg);
+    }
+
+    .imx-online__chart {
+      margin-top: 14px;
+    }
+
+    .imx-online__svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .imx-online__grid {
+      stroke: var(--hairline-color);
+      stroke-width: 1;
+    }
+
+    .imx-online__grid-label {
+      fill: var(--body-quiet-color);
+      font-size: 11px;
+    }
+
+    .imx-online__area {
+      fill: var(--link-fg);
+      opacity: 0.13;
+    }
+
+    .imx-online__line {
+      fill: none;
+      stroke: var(--link-fg);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .imx-online__dot {
+      fill: var(--link-fg);
+      stroke: var(--body-bg);
+      stroke-width: 2;
+      transition: r 0.15s ease;
+    }
+
+    .imx-online__dot:hover {
+      r: 6;
+    }
+
+    .imx-online__value {
+      fill: var(--body-fg);
+      font-size: 11px;
+      font-weight: 600;
+      text-anchor: middle;
+    }
+
+    .imx-online__weekday {
+      fill: var(--body-quiet-color);
+      font-size: 11px;
+      text-anchor: middle;
+    }
+
+    .imx-online__date {
+      fill: var(--body-loud-color);
+      font-size: 10px;
+      text-anchor: middle;
+    }
+
+    .imx-online__empty {
+      margin: 8px 0 0;
+      color: var(--body-quiet-color);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 640px) {
+      .imx-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .imx-online__stats {
+        width: 100%;
+      }
+
+      .imx-online__stat {
+        flex: 1 1 40%;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  {% admin_dashboard as dashboard %}
+  <section class="imx-dashboard" aria-labelledby="imx-dashboard-title">
+    <div class="imx-dashboard__head">
+      <div>
+        <h1 id="imx-dashboard-title" class="imx-dashboard__title">Пульс платформы</h1>
+        <p class="imx-dashboard__subtitle">
+          Сводка на {% now "j E Y, H:i" %} · динамика с {{ dashboard.period_start|date:"j E Y" }}
+        </p>
+      </div>
+      <span class="imx-pill{% if not dashboard.profanity_filter_enabled %} imx-pill--off{% endif %}">
+        {% if dashboard.profanity_filter_enabled %}
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          Фильтр нецензурной лексики включён
+        {% else %}
+          <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+          Фильтр нецензурной лексики выключен
+        {% endif %}
+      </span>
+    </div>
+
+    <section class="imx-online" aria-labelledby="imx-online-title">
+      <div class="imx-online__head">
+        <div>
+          <h2 id="imx-online-title" class="imx-online__title">
+            <i class="bi bi-activity" aria-hidden="true"></i>
+            Онлайн за 7 дней
+          </h2>
+          <p class="imx-online__subtitle">
+            Уникальные авторизованные пользователи в сутки · «сейчас» — активность за 15 минут
+          </p>
+        </div>
+        <div class="imx-online__stats">
+          <div class="imx-online__stat imx-online__stat--accent">
+            <span class="imx-online__stat-value">{{ dashboard.online.now }}</span>
+            <span class="imx-online__stat-label">онлайн сейчас</span>
+          </div>
+          <div class="imx-online__stat">
+            <span class="imx-online__stat-value">{{ dashboard.online.today }}</span>
+            <span class="imx-online__stat-label">сегодня</span>
+          </div>
+          <div class="imx-online__stat">
+            <span class="imx-online__stat-value">{{ dashboard.online.peak }}</span>
+            <span class="imx-online__stat-label">пик за неделю</span>
+          </div>
+          <div class="imx-online__stat">
+            <span class="imx-online__stat-value">{{ dashboard.online.average|floatformat:"-1" }}</span>
+            <span class="imx-online__stat-label">в среднем в день</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="imx-online__chart">
+        <svg class="imx-online__svg"
+             viewBox="0 0 {{ dashboard.online.chart.width }} {{ dashboard.online.chart.height }}"
+             role="img"
+             aria-labelledby="imx-online-svg-title"
+             preserveAspectRatio="xMidYMid meet">
+          <title id="imx-online-svg-title">График онлайна пользователей за последние 7 дней</title>
+          {% for line in dashboard.online.chart.grid %}
+            <line class="imx-online__grid"
+                  x1="{{ dashboard.online.chart.left }}"
+                  y1="{{ line.y|unlocalize }}"
+                  x2="{{ dashboard.online.chart.right }}"
+                  y2="{{ line.y|unlocalize }}"></line>
+            <text class="imx-online__grid-label"
+                  x="{{ dashboard.online.chart.left }}"
+                  y="{{ line.y|unlocalize }}"
+                  dx="-8"
+                  dominant-baseline="middle"
+                  text-anchor="end">{{ line.label }}</text>
+          {% endfor %}
+
+          <path class="imx-online__area" d="{{ dashboard.online.chart.area }}"></path>
+          <polyline class="imx-online__line" points="{{ dashboard.online.chart.line }}"></polyline>
+
+          {% for point in dashboard.online.chart.points %}
+            <circle class="imx-online__dot"
+                    cx="{{ point.x|unlocalize }}"
+                    cy="{{ point.y|unlocalize }}"
+                    r="4.5">
+              <title>{{ point.date|date:"j E" }}: {{ point.value }}</title>
+            </circle>
+            {% if point.value %}
+              <text class="imx-online__value" x="{{ point.x|unlocalize }}" y="{{ point.label_y|unlocalize }}">{{ point.value }}</text>
+            {% endif %}
+            <text class="imx-online__weekday"
+                  x="{{ point.x|unlocalize }}"
+                  y="{{ dashboard.online.chart.height|add:"-26" }}">{{ point.date|date:"D" }}</text>
+            <text class="imx-online__date"
+                  x="{{ point.x|unlocalize }}"
+                  y="{{ dashboard.online.chart.height|add:"-10" }}">{{ point.date|date:"d.m" }}</text>
+          {% endfor %}
+        </svg>
+      </div>
+
+      {% if not dashboard.online.total %}
+        <p class="imx-online__empty">
+          Данных пока нет — статистика начнёт накапливаться после первых входов пользователей.
+        </p>
+      {% endif %}
+    </section>
+
+    <div class="imx-grid">
+      {% for group in dashboard.groups %}
+        <article class="imx-card">
+          <header class="imx-card__head">
+            <span class="imx-card__icon"><i class="bi {{ group.icon }}" aria-hidden="true"></i></span>
+            <h2 class="imx-card__title">{{ group.title }}</h2>
+            <div class="imx-card__actions">
+              {% if group.list_url %}
+                <a href="{{ group.list_url }}">Управлять</a>
+              {% endif %}
+              {% if group.add_url %}
+                <a class="imx-card__add" href="{{ group.add_url }}" title="{{ group.add_label }}" aria-label="{{ group.add_label }}">+</a>
+              {% endif %}
+            </div>
+          </header>
+
+          <div class="imx-metrics">
+            {% for metric in group.metrics %}
+              {% if metric.url %}
+                <a class="imx-metric" href="{{ metric.url }}">
+              {% else %}
+                <div class="imx-metric">
+              {% endif %}
+                  <span class="imx-metric__value">{{ metric.display }}</span>
+                  <span class="imx-metric__label">{{ metric.label }}</span>
+                  {% if metric.hint %}<span class="imx-metric__hint">{{ metric.hint }}</span>{% endif %}
+              {% if metric.url %}
+                </a>
+              {% else %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <ul class="imx-details">
+            {% for item in group.details %}
+              <li><span>{{ item.label }}</span><strong>{{ item.value }}</strong></li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        <h3>{% translate 'My actions' %}</h3>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+            <p>{% translate 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                <span class="visually-hidden">{% if entry.is_addition %}{% translate 'Added:' %}{% elif entry.is_change %}{% translate 'Changed:' %}{% elif entry.is_deletion %}{% translate 'Deleted:' %}{% endif %}</span>
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                    {{ entry.object_repr }}
+                {% else %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br>
+                {% if entry.content_type %}
+                    <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+                {% else %}
+                    <span class="mini quiet">{% translate 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}

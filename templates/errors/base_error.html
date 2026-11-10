@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>{% block title %}Ошибка — IdeaMix{% endblock %}</title>
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('ideamix-theme');
+                var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute(
+                    'data-theme',
+                    saved === 'dark' || saved === 'light' ? saved : (dark ? 'dark' : 'light')
+                );
+            } catch (error) {}
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #17162b;
+            --muted: #6a6884;
+            --line: #e6e4f2;
+            --violet: #6d3bf5;
+            --cyan: #06b6d4;
+            --bg: #faf9ff;
+            --card: rgba(255, 255, 255, 0.86);
+            --ghost: #fff;
+            --icon-bg: #f1edff;
+            --shadow: 0 24px 70px rgba(45, 35, 100, 0.12);
+            color-scheme: light;
+        }
+        :root[data-theme="dark"] {
+            --ink: #f4f2ff;
+            --muted: #aaa5c2;
+            --line: #2c2845;
+            --violet: #a181ff;
+            --cyan: #45d6e9;
+            --bg: #0c0b16;
+            --card: rgba(23, 21, 40, 0.9);
+            --ghost: #171528;
+            --icon-bg: #2b2153;
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+            color-scheme: dark;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+            color: var(--ink);
+            font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(109, 59, 245, 0.14), transparent 36%),
+                radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.12), transparent 34%),
+                var(--bg);
+        }
+        .error-shell { width: 100%; max-width: 640px; text-align: center; }
+        .error-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 34px;
+            color: var(--ink);
+            font-family: "Unbounded", sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .error-brand-mark {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            color: #fff;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--violet), var(--cyan));
+            box-shadow: 0 10px 24px rgba(109, 59, 245, 0.28);
+        }
+        .error-brand span:last-child span { color: var(--violet); }
+        .error-card {
+            padding: 48px 36px 40px;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+        .error-code {
+            display: inline-block;
+            margin-bottom: 10px;
+            font-family: "Unbounded", sans-serif;
+            font-size: clamp(3.4rem, 12vw, 5.6rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.06em;
+            background: linear-gradient(120deg, var(--violet), #2563eb 55%, var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .error-icon {
+            display: grid;
+            place-items: center;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 18px;
+            border-radius: 20px;
+            color: var(--violet);
+            font-size: 1.7rem;
+            background: var(--icon-bg);
+        }
+        h1 { margin: 0 0 12px; font-size: clamp(1.45rem, 4vw, 1.9rem); letter-spacing: -0.03em; }
+        p { margin: 0 auto 26px; max-width: 440px; color: var(--muted); line-height: 1.65; }
+        .error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font: inherit;
+            font-size: 0.94rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(120deg, var(--violet), #4f46e5);
+            box-shadow: 0 10px 24px rgba(109, 59, 245, 0.3);
+        }
+        .btn-ghost { color: var(--ink); border-color: var(--line); background: var(--ghost); }
+        .error-foot { margin-top: 22px; color: var(--muted); font-size: 0.82rem; }
+        @media (max-width: 560px) {
+            .error-card { padding: 34px 20px 30px; border-radius: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="error-shell">
+        <a class="error-brand" href="{% url 'ideas:home' %}">
+            <span class="error-brand-mark" aria-hidden="true">IM</span>
+            <span>Idea<span>Mix</span></span>
+        </a>
+        <div class="error-card">
+            <div class="error-icon" aria-hidden="true">{% block icon %}<i>!</i>{% endblock %}</div>
+            <div class="error-code">{% block code %}500{% endblock %}</div>
+            <h1>{% block heading %}Что-то пошло не так{% endblock %}</h1>
+            <p>{% block message %}Попробуйте обновить страницу или вернуться на главную.{% endblock %}</p>
+            <div class="error-actions">
+                <a class="btn btn-primary" href="{% url 'ideas:home' %}">На главную</a>
+                <a class="btn btn-ghost" href="{% url 'ideas:explore' %}">К идеям</a>
+            </div>
+        </div>
+        <p class="error-foot">IdeaMix — от идеи к реальности</p>
+    </main>
+</body>
+</html>

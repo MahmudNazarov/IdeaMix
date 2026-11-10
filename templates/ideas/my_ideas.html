@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Мои идеи — IdeaMix{% endblock %}
+{% block description %}Черновики, опубликованные идеи и идеи в работе — управляйте своими замыслами на IdeaMix.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="page-hero-grid">
+            <div class="page-hero-copy">
+                <span class="eyebrow"><i class="bi bi-lightbulb" aria-hidden="true"></i> Личный кабинет</span>
+                <h1>Мои идеи</h1>
+                <p>Все ваши замыслы в одном месте: от черновиков до реализованных проектов.</p>
+            </div>
+            <div class="page-hero-aside page-hero-actions">
+                <a class="btn btn-primary btn-lg" href="{% url 'ideas:idea_create' %}">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Новая идея
+                </a>
+                <a class="btn btn-ghost btn-lg" href="{% url 'ideas:profile' user.username %}">
+                    <i class="bi bi-person" aria-hidden="true"></i> Профиль
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-tight">
+    <div class="container">
+        <div class="status-tabs" role="tablist" aria-label="Фильтр идей по статусу">
+            <a class="status-tab {% if not active_status %}active{% endif %}"
+               href="{% url 'ideas:my_ideas' %}" role="tab" aria-selected="{% if not active_status %}true{% else %}false{% endif %}">
+                Все <span class="status-tab-count">{{ total_count }}</span>
+            </a>
+            {% for tab in status_tabs %}
+                <a class="status-tab status-tab-{{ tab.value }} {% if active_status == tab.value %}active{% endif %}"
+                   href="?status={{ tab.value }}" role="tab"
+                   aria-selected="{% if active_status == tab.value %}true{% else %}false{% endif %}">
+                    {{ tab.label }} <span class="status-tab-count">{{ tab.count }}</span>
+                </a>
+            {% endfor %}
+        </div>
+
+        <div class="results-head">
+            <p class="results-count">
+                {% if active_status %}
+                    Найдено идей: <strong>{{ page_obj.paginator.count }}</strong>
+                {% else %}
+                    Всего идей: <strong>{{ total_count }}</strong>
+                {% endif %}
+            </p>
+            <span class="results-hint"><i class="bi bi-eye-slash" aria-hidden="true"></i> Черновики видны только вам</span>
+        </div>
+
+        {% if page_obj.object_list %}
+            <div class="idea-grid">
+                {% for idea in page_obj %}
+                    <div class="idea-card-shell">
+                        {% include 'includes/idea_card.html' %}
+                        <div class="card-quick-actions">
+                            <a href="{% url 'ideas:idea_edit' idea.slug %}">
+                                <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+                            </a>
+                            <a href="{{ idea.get_absolute_url }}">
+                                <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Открыть
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% include 'includes/pagination.html' %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-visual empty-visual-sm" aria-hidden="true">
+                    <span class="empty-orb"></span>
+                    <span class="empty-float empty-float-1"><i class="bi bi-lightbulb"></i></span>
+                    <span class="empty-float empty-float-2"><i class="bi bi-plus"></i></span>
+                </div>
+                {% if active_status %}
+                    <h2>В этом статусе пока пусто</h2>
+                    <p>Переключите фильтр или создайте новую идею — черновик можно сохранить в один клик.</p>
+                {% else %}
+                    <h2>Здесь появится ваша первая идея</h2>
+                    <p>Опишите задумку, сохраните черновик или опубликуйте её для сообщества.</p>
+                {% endif %}
+                <div class="empty-actions">
+                    <a class="btn btn-primary" href="{% url 'ideas:idea_create' %}">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Создать идею
+                    </a>
+                    <a class="btn btn-ghost" href="{% url 'ideas:explore' %}">Вдохновиться каталогом</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

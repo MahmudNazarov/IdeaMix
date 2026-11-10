@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Редактировать комментарий — IdeaMix{% endblock %}
+{% block description %}Измените свой комментарий к идее «{{ idea.title }}».{% endblock %}
+
+{% block content %}
+<div class="container container-narrow">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{{ idea.get_absolute_url }}">{{ idea.title|truncatechars:44 }}</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Редактирование комментария</span>
+    </nav>
+
+    <section class="page-hero page-hero-compact">
+        <div>
+            <span class="eyebrow"><i class="bi bi-chat-dots" aria-hidden="true"></i> Обсуждение</span>
+            <h1>Редактировать комментарий</h1>
+            <p>Внесите правки — в обсуждении появится отметка о том, что комментарий был изменён.</p>
+        </div>
+    </section>
+
+    <div class="form-layout form-layout-single">
+        <form class="form-card" method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+            {% include 'includes/form_field.html' with field=form.text %}
+            <div class="form-note">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <span>Оригинал написан {{ comment.created_at|date:"d.m.Y в H:i" }}. После сохранения будет обновлена дата изменения.</span>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-check2" aria-hidden="true"></i> Сохранить комментарий
+                </button>
+                <a class="btn btn-ghost" href="{{ idea.get_absolute_url }}#comment-{{ comment.pk }}">Отмена</a>
+            </div>
+        </form>
+
+        <aside class="form-aside">
+            <div class="side-card">
+                <div class="side-card-head"><h2>Идея</h2></div>
+                <a class="side-comment-idea" href="{{ idea.get_absolute_url }}">
+                    <span class="side-idea-cover" style="--card-hue: {{ idea|card_hue }};">
+                        {% if idea.cover_image %}
+                            <img src="{{ idea.cover_image.url }}" alt="">
+                        {% else %}
+                            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                        {% endif %}
+                    </span>
+                    <span>
+                        <strong>{{ idea.title }}</strong>
+                        <small>{{ idea.author.username }} · {{ idea.get_status_display }}</small>
+                    </span>
+                </a>
+                <div class="form-note form-note-soft">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                    <span>Редактировать комментарий может только его автор.</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

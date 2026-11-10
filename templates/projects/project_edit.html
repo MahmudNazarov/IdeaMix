@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Редактировать «{{ project.title }}» — IdeaMix{% endblock %}
+{% block description %}Обновите описание, статус, технологии и настройки проекта «{{ project.title }}» на IdeaMix.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:project_list' %}">Проекты</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{{ project.get_absolute_url }}">{{ project.title|truncatechars:40 }}</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Редактирование</span>
+    </nav>
+
+    <section class="page-hero page-hero-compact">
+        <div>
+            <span class="eyebrow"><i class="bi bi-pencil-square" aria-hidden="true"></i> Управление проектом</span>
+            <h1>Редактировать проект</h1>
+            <p>Обновите цель, состав команды и ссылки. Изменения сразу увидят участники и гости проекта.</p>
+        </div>
+        <div class="page-hero-aside">
+            <div class="page-hero-metric">
+                <strong>{{ project.member_count }}</strong>
+                <span>участников · {{ project.idea_count }} идей</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="form-layout">
+        <form class="form-card" method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-flag" aria-hidden="true"></i></span>
+                    О проекте
+                </legend>
+                {% include 'includes/form_field.html' with field=form.title %}
+                {% include 'includes/form_field.html' with field=form.description %}
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.category %}
+                    {% include 'includes/form_field.html' with field=form.related_idea %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-blue"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    Команда и технологии
+                </legend>
+                {% include 'includes/form_field.html' with field=form.technologies %}
+                {% include 'includes/form_field.html' with field=form.needed_specialists %}
+                {% include 'includes/form_field.html' with field=form.is_open %}
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-cyan"><i class="bi bi-link-45deg" aria-hidden="true"></i></span>
+                    Ссылки
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.repository_url %}
+                    {% include 'includes/form_field.html' with field=form.demo_url %}
+                </div>
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                    Публикация
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.status %}
+                    {% include 'includes/form_field.html' with field=form.visibility %}
+                </div>
+            </fieldset>
+
+            <div class="form-actions form-actions-split">
+                <div class="form-actions-main">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Сохранить изменения
+                    </button>
+                    <a class="btn btn-ghost" href="{{ project.get_absolute_url }}">Отмена</a>
+                </div>
+                <a class="btn btn-danger-soft" href="{% url 'ideas:project_delete' project.slug %}">
+                    <i class="bi bi-trash3" aria-hidden="true"></i> Удалить проект
+                </a>
+            </div>
+        </form>
+
+        <aside class="form-aside">
+            <div class="side-card">
+                <div class="side-card-head"><h2>Текущее состояние</h2></div>
+                <dl class="mini-facts">
+                    <div><dt>Статус</dt><dd>{{ project.get_status_display }}</dd></div>
+                    <div><dt>Видимость</dt><dd>{{ project.get_visibility_display }}</dd></div>
+                    <div><dt>Набор открыт</dt><dd>{{ project.is_open|yesno:"Да,Нет" }}</dd></div>
+                    <div><dt>Обновлён</dt><dd>{{ project.updated_at|date:"d.m.Y H:i" }}</dd></div>
+                </dl>
+                <a class="btn btn-ghost btn-sm btn-block" href="{{ project.get_absolute_url }}">
+                    <i class="bi bi-eye" aria-hidden="true"></i> Открыть страницу проекта
+                </a>
+            </div>
+            <div class="side-card side-note">
+                <span class="side-cta-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+                <h2>Только для создателя</h2>
+                <p>Редактировать проект и управлять участниками может только его создатель. Эти права проверяются на сервере.</p>
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

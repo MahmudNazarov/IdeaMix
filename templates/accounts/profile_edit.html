@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Настройки профиля — IdeaMix{% endblock %}
+{% block description %}Обновите имя, аватар, биографию и навыки в профиле IdeaMix.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:profile' user.username %}">Мой профиль</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Настройки</span>
+    </nav>
+
+    <section class="page-hero page-hero-compact">
+        <div>
+            <span class="eyebrow"><i class="bi bi-gear" aria-hidden="true"></i> Аккаунт</span>
+            <h1>Настройки профиля</h1>
+            <p>Расскажите о себе, добавьте навыки и фото — так проще найти единомышленников и собрать команду.</p>
+        </div>
+        <div class="page-hero-aside">
+            <a class="btn btn-ghost" href="{% url 'ideas:profile' user.username %}">
+                <i class="bi bi-person" aria-hidden="true"></i> Мой профиль
+            </a>
+        </div>
+    </section>
+
+    <div class="settings-layout">
+        <aside class="settings-side">
+            <div class="settings-avatar-card">
+                <span class="avatar avatar-xl settings-avatar">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Текущий аватар">
+                    {% else %}
+                        <span>{{ user|initials }}</span>
+                    {% endif %}
+                </span>
+                <h2>{{ user.get_full_name|default:user.username }}</h2>
+                <span class="settings-handle">@{{ user.username }}</span>
+                <span class="settings-since"><i class="bi bi-calendar3" aria-hidden="true"></i> С {{ user.date_joined|date:"d.m.Y" }}</span>
+            </div>
+
+            <nav class="settings-nav" aria-label="Настройки аккаунта">
+                <a class="settings-nav-item active" href="{% url 'ideas:profile_edit' %}">
+                    <i class="bi bi-person-gear" aria-hidden="true"></i> Профиль
+                </a>
+                <a class="settings-nav-item" href="{% url 'ideas:password_change' %}">
+                    <i class="bi bi-shield-lock" aria-hidden="true"></i> Безопасность
+                </a>
+                <a class="settings-nav-item" href="{% url 'ideas:my_ideas' %}">
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i> Мои идеи
+                </a>
+                <a class="settings-nav-item" href="{% url 'ideas:favorites' %}">
+                    <i class="bi bi-bookmark" aria-hidden="true"></i> Избранное
+                </a>
+            </nav>
+        </aside>
+
+        <form class="form-card settings-form" method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon"><i class="bi bi-person" aria-hidden="true"></i></span>
+                    Личные данные
+                </legend>
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.first_name %}
+                    {% include 'includes/form_field.html' with field=form.last_name %}
+                </div>
+                {% include 'includes/form_field.html' with field=form.email %}
+                {% include 'includes/form_field.html' with field=form.bio %}
+                <div class="form-grid-2">
+                    {% include 'includes/form_field.html' with field=form.location %}
+                    {% include 'includes/form_field.html' with field=form.website %}
+                </div>
+                {% include 'includes/form_field.html' with field=form.skills %}
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>
+                    <span class="form-section-icon form-section-icon-blue"><i class="bi bi-image" aria-hidden="true"></i></span>
+                    Фотография
+                </legend>
+                <div class="avatar-upload-row">
+                    <span class="avatar avatar-lg">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="">
+                        {% else %}
+                            <span>{{ user|initials }}</span>
+                        {% endif %}
+                    </span>
+                    <div class="upload-box upload-box-grow">
+                        {% include 'includes/form_field.html' with field=form.avatar %}
+                        <div class="upload-preview" id="avatarPreview" hidden>
+                            <img alt="Предпросмотр аватара">
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-actions form-actions-split">
+                <div class="form-actions-main">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2" aria-hidden="true"></i> Сохранить профиль
+                    </button>
+                    <a class="btn btn-ghost" href="{% url 'ideas:profile' user.username %}">Отмена</a>
+                </div>
+                <a class="btn btn-danger-soft" href="{% url 'ideas:password_change' %}">
+                    <i class="bi bi-shield-lock" aria-hidden="true"></i> Сменить пароль
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

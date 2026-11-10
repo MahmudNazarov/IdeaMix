@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}О проекте — IdeaMix{% endblock %}
+{% block description %}IdeaMix — платформа, где идеи находят команду. Узнайте, как идея превращается в реальный проект.{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+    <div class="container about-hero-grid">
+        <div>
+            <span class="eyebrow"><i class="bi bi-stars" aria-hidden="true"></i> О IdeaMix</span>
+            <h1>Мы верим, что<br><span class="hero-gradient">идеи меняют мир</span></h1>
+            <p class="about-lead">
+                IdeaMix — пространство, где люди собирают идеи, делятся ими с другими,
+                находят единомышленников и превращают задумки в реальные проекты.
+            </p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" href="{% url 'ideas:explore' %}">
+                    <i class="bi bi-compass" aria-hidden="true"></i> Исследовать идеи
+                </a>
+                <a class="btn btn-soft btn-lg"
+                   href="{% if user.is_authenticated %}{% url 'ideas:idea_create' %}{% else %}{% url 'ideas:register' %}{% endif %}">
+                    Присоединиться
+                </a>
+            </div>
+        </div>
+        <div class="about-stats-card">
+            <div class="about-stats-head">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span>Сообщество IdeaMix сегодня</span>
+            </div>
+            <div class="about-stat-grid">
+                <div><strong>{{ stats.ideas|compact }}</strong><span>идей</span></div>
+                <div><strong>{{ stats.users|compact }}</strong><span>участников</span></div>
+                <div><strong>{{ stats.projects|compact }}</strong><span>проектов</span></div>
+                <div><strong>{{ stats.likes|compact }}</strong><span>лайков</span></div>
+            </div>
+            <div class="about-stats-note">
+                <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                Все цифры обновляются в реальном времени из базы платформы.
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-head section-head-center">
+            <div>
+                <span class="section-eyebrow">Наша миссия</span>
+                <h2>Соединять мысли и людей</h2>
+                <p>Хорошая идея редко рождается в одиночку. Мы создаём среду, где можно безопасно делиться задумками, получать честную обратную связь и находить тех, кто дополнит вас.</p>
+            </div>
+        </div>
+        <div class="value-grid">
+            <article class="value-card" data-reveal>
+                <span class="value-icon"><i class="bi bi-chat-heart" aria-hidden="true"></i></span>
+                <h3>Открытость</h3>
+                <p>Делитесь идеями публично или приватно — вы сами решаете, кто увидит вашу мысль.</p>
+            </article>
+            <article class="value-card" data-reveal>
+                <span class="value-icon value-icon-blue"><i class="bi bi-people" aria-hidden="true"></i></span>
+                <h3>Сотрудничество</h3>
+                <p>Команды собираются вокруг идеи: разработчики, дизайнеры, исследователи и авторы.</p>
+            </article>
+            <article class="value-card" data-reveal>
+                <span class="value-icon value-icon-green"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span>
+                <h3>Прогресс</h3>
+                <p>Статусы, этапы и участники помогают видеть, как мысль превращается в работающий проект.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section section-how">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="section-eyebrow"><i class="bi bi-signpost-split" aria-hidden="true"></i> Путь идеи</span>
+                <h2>Как работает IdeaMix</h2>
+                <p>От первой публикации до запуска проекта — прозрачный путь для автора и команды.</p>
+            </div>
+        </div>
+        <div class="about-flow">
+            <article class="about-flow-step" data-reveal>
+                <span class="about-flow-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span>
+                <span class="about-flow-index">01</span>
+                <h3>Опубликуйте</h3>
+                <p>Создайте идею: название, краткое и полное описание, категория, теги и обложка. Черновик можно сохранить и вернуться позже.</p>
+            </article>
+            <article class="about-flow-step" data-reveal>
+                <span class="about-flow-icon about-flow-icon-blue"><i class="bi bi-heart" aria-hidden="true"></i></span>
+                <span class="about-flow-index">02</span>
+                <h3>Получите поддержку</h3>
+                <p>Лайки, избранное и комментарии показывают, какие идеи откликаются сообществу.</p>
+            </article>
+            <article class="about-flow-step" data-reveal>
+                <span class="about-flow-icon about-flow-icon-cyan"><i class="bi bi-diagram-3" aria-hidden="true"></i></span>
+                <span class="about-flow-index">03</span>
+                <h3>Создайте проект</h3>
+                <p>Свяжите проект с идеей, укажите технологии, нужных специалистов и пригласите команду.</p>
+            </article>
+            <article class="about-flow-step" data-reveal>
+                <span class="about-flow-icon about-flow-icon-green"><i class="bi bi-flag" aria-hidden="true"></i></span>
+                <span class="about-flow-index">04</span>
+                <h3>Доведите до результата</h3>
+                <p>Ведите проект через планирование, работу и завершение. Делитесь ссылками на репозиторий и демо.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="about-principles">
+            <div>
+                <span class="section-eyebrow"><i class="bi bi-shield-check" aria-hidden="true"></i> Принципы</span>
+                <h2>Уважение к автору и его идее</h2>
+                <p>Вы владеете своими идеями. Приватные задумки видны только вам и участникам связанных проектов. Редактировать и удалять контент может только автор, а права проверяются на сервере.</p>
+            </div>
+            <ul class="check-list">
+                <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Приватность и видимость под контролем автора</li>
+                <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Права на редактирование только у владельца</li>
+                <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Проверка загружаемых изображений</li>
+                <li><i class="bi bi-check2-circle" aria-hidden="true"></i> Прозрачные правила для участников проектов</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="section section-cta">
+    <div class="container">
+        <div class="cta-panel">
+            <div class="cta-glow" aria-hidden="true"></div>
+            <div class="cta-content">
+                <span class="eyebrow eyebrow-light">Начните сегодня</span>
+                <h2>Идея уже есть?<br>Осталось найти команду</h2>
+                <p>Присоединяйтесь к IdeaMix и превратите задумку в следующий большой проект.</p>
+                <div class="cta-actions">
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-light btn-lg" href="{% url 'ideas:idea_create' %}">Создать идею</a>
+                        <a class="btn btn-outline-light btn-lg" href="{% url 'ideas:project_list' %}">Смотреть проекты</a>
+                    {% else %}
+                        <a class="btn btn-light btn-lg" href="{% url 'ideas:register' %}">Создать аккаунт</a>
+                        <a class="btn btn-outline-light btn-lg" href="{% url 'ideas:login' %}">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

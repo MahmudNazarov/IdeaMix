@@ -1,0 +1,63 @@
+{% load idea_extras %}
+<article class="idea-card" data-reveal>
+    <a class="idea-card-cover" href="{{ idea.get_absolute_url }}" tabindex="-1" aria-hidden="true"
+       style="--card-hue: {{ idea|card_hue }};">
+        {% if idea.cover_image %}
+            <img src="{{ idea.cover_image.url }}" alt="" loading="lazy">
+        {% else %}
+            <span class="cover-glow"></span>
+            <span class="cover-letter">{{ idea.title|slice:':1' }}</span>
+            <span class="cover-icon"><i class="bi {{ idea.category.icon|default:'bi-lightbulb' }}"></i></span>
+        {% endif %}
+        <span class="status-pill status-{{ idea.status }}">{{ idea.get_status_display }}</span>
+        {% if idea.is_private %}
+            <span class="private-pill"><i class="bi bi-lock-fill" aria-hidden="true"></i> Приватная</span>
+        {% endif %}
+    </a>
+
+    <div class="idea-card-body">
+        <div class="idea-card-topline">
+            {% if idea.category %}
+                <a class="category-label" href="{% url 'ideas:explore' %}?category={{ idea.category.slug }}">
+                    <i class="bi {{ idea.category.icon }}" aria-hidden="true"></i> {{ idea.category.name }}
+                </a>
+            {% else %}
+                <span class="category-label"><i class="bi bi-lightbulb" aria-hidden="true"></i> Идея</span>
+            {% endif %}
+            <time datetime="{{ idea.created_at|date:'c' }}">{{ idea.created_at|date:"d.m.Y" }}</time>
+        </div>
+
+        <h3 class="idea-card-title">
+            <a href="{{ idea.get_absolute_url }}">{{ idea.title }}</a>
+        </h3>
+        <p class="idea-card-excerpt">
+            {{ idea.short_description|default:idea.description|striptags|truncatechars:150 }}
+        </p>
+
+        {% if idea.tags_list %}
+            <div class="idea-card-tags">
+                {% for tag in idea.tags_list|slice:':3' %}
+                    <a class="tag-chip tag-chip-sm" href="{% url 'ideas:explore' %}?tag={{ tag|urlencode }}">#{{ tag }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="idea-card-footer">
+            <a class="author-mini" href="{% url 'ideas:profile' idea.author.username %}">
+                <span class="avatar avatar-xs">
+                    {% if idea.author.profile.avatar %}
+                        <img src="{{ idea.author.profile.avatar.url }}" alt="">
+                    {% else %}
+                        <span>{{ idea.author|initials }}</span>
+                    {% endif %}
+                </span>
+                <span>@{{ idea.author.username }}</span>
+            </a>
+            <div class="idea-card-stats">
+                <span title="Лайки"><i class="bi bi-heart" aria-hidden="true"></i> {{ idea.like_count|default:0 }}</span>
+                <span title="Комментарии"><i class="bi bi-chat-dots" aria-hidden="true"></i> {{ idea.comment_count|default:0 }}</span>
+                <span title="Просмотры"><i class="bi bi-eye" aria-hidden="true"></i> {{ idea.views_count|compact }}</span>
+            </div>
+        </div>
+    </div>
+</article>

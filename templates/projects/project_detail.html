@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}{{ project.title }} — IdeaMix{% endblock %}
+{% block description %}{{ project.description|striptags|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ project.title }} — IdeaMix{% endblock %}
+
+{% block content %}
+<section class="project-hero project-hero-detail">
+    <div class="project-hero-bg" aria-hidden="true">
+        <span class="project-hero-orb project-hero-orb-1"></span>
+        <span class="project-hero-orb project-hero-orb-2"></span>
+    </div>
+    <div class="container">
+        <nav class="breadcrumbs breadcrumbs-light" aria-label="Хлебные крошки">
+            <a href="{% url 'ideas:home' %}"><i class="bi bi-house-door" aria-hidden="true"></i> Главная</a>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <a href="{% url 'ideas:project_list' %}">Проекты</a>
+            {% if project.category %}
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                <a href="{% url 'ideas:project_list' %}?category={{ project.category.slug }}">{{ project.category.name }}</a>
+            {% endif %}
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span>{{ project.title|truncatechars:44 }}</span>
+        </nav>
+
+        <div class="project-hero-head">
+            <div class="project-hero-copy">
+                <div class="detail-badges">
+                    <span class="status-pill status-{{ project.status }}">{{ project.get_status_display }}</span>
+                    {% if project.category %}
+                        <a class="category-label category-label-light" href="{% url 'ideas:project_list' %}?category={{ project.category.slug }}">
+                            <i class="bi {{ project.category.icon }}" aria-hidden="true"></i> {{ project.category.name }}
+                        </a>
+                    {% endif %}
+                    {% if project.is_private %}
+                        <span class="private-pill"><i class="bi bi-lock-fill" aria-hidden="true"></i> Приватный проект</span>
+                    {% endif %}
+                    {% if project.is_open %}
+                        <span class="open-pill"><i class="bi bi-unlock" aria-hidden="true"></i> Набор открыт</span>
+                    {% endif %}
+                </div>
+
+                <h1>{{ project.title }}</h1>
+                <p class="project-hero-lead">{{ project.description|striptags|truncatechars:240 }}</p>
+
+                <div class="project-hero-meta">
+                    <a class="author-mini author-mini-light" href="{% url 'ideas:profile' project.creator.username %}">
+                        <span class="avatar avatar-sm">
+                            {% if project.creator.profile.avatar %}
+                                <img src="{{ project.creator.profile.avatar.url }}" alt="">
+                            {% else %}
+                                <span>{{ project.creator|initials }}</span>
+                            {% endif %}
+                        </span>
+                        <span class="author-meta">
+                            <strong>{{ project.creator.get_full_name|default:project.creator.username }}</strong>
+                            <span>создатель проекта</span>
+                        </span>
+                    </a>
+                    <span class="meta-item"><i class="bi bi-people" aria-hidden="true"></i> {{ project.member_count }} участников</span>
+                    <span class="meta-item"><i class="bi bi-lightbulb" aria-hidden="true"></i> {{ project.idea_count }} идей</span>
+                    <span class="meta-item"><i class="bi bi-calendar3" aria-hidden="true"></i> с {{ project.created_at|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+
+            <div class="project-hero-actions">
+                {% if is_manager %}
+                    <a class="btn btn-light" href="{% url 'ideas:project_edit' project.slug %}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+                    </a>
+                    <a class="btn btn-outline-light" href="{% url 'ideas:project_delete' project.slug %}">
+                        <i class="bi bi-trash3" aria-hidden="true"></i> Удалить
+                    </a>
+                {% elif is_member %}
+                    <span class="project-member-badge"><i class="bi bi-check2-circle" aria-hidden="true"></i> Вы в команде</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-detail">
+    <div class="container project-detail-layout">
+        <div class="project-main">
+            <article class="detail-main project-about">
+                <div class="panel-head">
+                    <div>
+                        <h2>О проекте</h2>
+                        <p>Цель, текущий этап и то, что уже сделано.</p>
+                    </div>
+                    {% if project.is_private %}
+                        <span class="private-pill"><i class="bi bi-lock-fill" aria-hidden="true"></i> Виден участникам</span>
+                    {% endif %}
+                </div>
+                <div class="prose">
+                    {{ project.description|linebreaks }}
+                </div>
+
+                {% if project.technologies_list or project.needed_specialists_list %}
+                    <div class="project-spec-grid">
+                        {% if project.technologies_list %}
+                            <div class="project-spec">
+                                <span class="project-spec-icon"><i class="bi bi-code-slash" aria-hidden="true"></i></span>
+                                <div>
+                                    <h3>Технологии</h3>
+                                    <div class="tech-row tech-row-lg">
+                                        {% for tech in project.technologies_list %}
+                                            <span class="tech-chip">{{ tech }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if project.needed_specialists_list %}
+                            <div class="project-spec">
+                                <span class="project-spec-icon project-spec-icon-blue"><i class="bi bi-person-plus" aria-hidden="true"></i></span>
+                                <div>
+                                    <h3>Ищем в команду</h3>
+                                    <div class="tech-row tech-row-lg">
+                                        {% for specialist in project.needed_specialists_list %}
+                                            <span class="tech-chip tech-chip-need">{{ specialist }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if project.repository_url or project.demo_url %}
+                    <div class="project-links">
+                        {% if project.repository_url %}
+                            <a class="project-link" href="{{ project.repository_url }}" target="_blank" rel="noopener noreferrer">
+                                <span class="project-link-icon"><i class="bi bi-github" aria-hidden="true"></i></span>
+                                <span><strong>Репозиторий</strong><small>{{ project.repository_url|truncatechars:52 }}</small></span>
+                                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                            </a>
+                        {% endif %}
+                        {% if project.demo_url %}
+                            <a class="project-link" href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer">
+                                <span class="project-link-icon project-link-icon-blue"><i class="bi bi-globe2" aria-hidden="true"></i></span>
+                                <span><strong>Демо</strong><small>{{ project.demo_url|truncatechars:52 }}</small></span>
+                                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </article>
+
+            {% if related_idea_visible and project.related_idea %}
+                <article class="related-idea-card">
+                    <div class="related-idea-head">
+                        <span class="related-idea-label"><i class="bi bi-lightbulb" aria-hidden="true"></i> Идея-основа</span>
+                        <a class="section-link" href="{{ project.related_idea.get_absolute_url }}">Открыть идею <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    </div>
+                    <a class="related-idea-body" href="{{ project.related_idea.get_absolute_url }}">
+                        <span class="related-idea-cover" style="--card-hue: {{ project.related_idea|card_hue }};">
+                            {% if project.related_idea.cover_image %}
+                                <img src="{{ project.related_idea.cover_image.url }}" alt="">
+                            {% else %}
+                                <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                            {% endif %}
+                        </span>
+                        <span class="related-idea-copy">
+                            <strong>{{ project.related_idea.title }}</strong>
+                            <small>{{ project.related_idea.short_description|default:project.related_idea.description|striptags|truncatechars:130 }}</small>
+                        </span>
+                        <span class="related-idea-stats">
+                            <span><i class="bi bi-heart" aria-hidden="true"></i> {{ project.related_idea.like_count }}</span>
+                            <span><i class="bi bi-chat-dots" aria-hidden="true"></i> {{ project.related_idea.comment_count }}</span>
+                        </span>
+                    </a>
+                </article>
+            {% endif %}
+
+            <section class="project-ideas" aria-labelledby="project-ideas-title">
+                <div class="panel-head">
+                    <div>
+                        <h2 id="project-ideas-title">Идеи проекта <span class="count-badge">{{ ideas|length }}</span></h2>
+                        <p>Замыслы, которые команда взяла в работу.</p>
+                    </div>
+                    {% if is_manager %}
+                        <a class="btn btn-ghost btn-sm" href="{% url 'ideas:idea_create' %}">
+                            <i class="bi bi-plus-lg" aria-hidden="true"></i> Новая идея
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if ideas %}
+                    <div class="idea-grid idea-grid-compact">
+                        {% for idea in ideas %}
+                            <div class="idea-card-shell">
+                                {% include 'includes/idea_card.html' %}
+                                {% if is_manager %}
+                                    <form method="post" action="{% url 'ideas:project_idea_remove' project.slug idea.pk %}"
+                                          class="card-quick-actions card-quick-actions-danger"
+                                          data-confirm="Убрать идею «{{ idea.title }}» из проекта?">
+                                        {% csrf_token %}
+                                        <button type="submit" class="link-danger">
+                                            <i class="bi bi-x-circle" aria-hidden="true"></i> Убрать из проекта
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state empty-state-inline">
+                        <span class="empty-inline-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+                        <h3>В проекте пока нет идей</h3>
+                        <p>{% if is_manager %}Добавьте свою идею через панель управления справа.{% else %}Участники ещё не прикрепили идеи к проекту.{% endif %}</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <aside class="project-side">
+            <div class="side-card project-join-card">
+                <div class="side-card-head"><h2>Команда проекта</h2></div>
+                <div class="project-join-stats">
+                    <div><strong>{{ project.member_count }}</strong><span>участников</span></div>
+                    <div><strong>{{ project.idea_count }}</strong><span>идей</span></div>
+                </div>
+
+                {% if can_join %}
+                    <form method="post" action="{% url 'ideas:project_join' project.slug %}" class="join-form">
+                        {% csrf_token %}
+                        <label for="{{ join_form.role.id_for_label }}">Ваша роль в команде</label>
+                        {{ join_form.role }}
+                        {% for error in join_form.role.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                        <button class="btn btn-primary btn-block" type="submit">
+                            <i class="bi bi-person-plus" aria-hidden="true"></i> Присоединиться
+                        </button>
+                    </form>
+                {% elif not user.is_authenticated %}
+                    <div class="side-cta-text">
+                        <p>Войдите, чтобы присоединиться к команде проекта.</p>
+                        <a class="btn btn-primary btn-sm btn-block"
+                           href="{% url 'ideas:login' %}?next={{ project.get_absolute_url|urlencode }}">Войти</a>
+                    </div>
+                {% elif is_member and project.creator_id != user.pk %}
+                    <div class="side-cta-text">
+                        <p><i class="bi bi-check2-circle" aria-hidden="true"></i> Вы участник этого проекта.</p>
+                        <form method="post" action="{% url 'ideas:project_leave' project.slug %}"
+                              data-confirm="Покинуть команду проекта?">
+                            {% csrf_token %}
+                            <button class="btn btn-danger-soft btn-sm btn-block" type="submit">
+                                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Покинуть проект
+                            </button>
+                        </form>
+                    </div>
+                {% elif not project.is_open %}
+                    <div class="side-cta-text">
+                        <p><i class="bi bi-lock" aria-hidden="true"></i> Набор в команду сейчас закрыт.</p>
+                    </div>
+                {% elif project.creator_id == user.pk %}
+                    <div class="side-cta-text">
+                        <p><i class="bi bi-star" aria-hidden="true"></i> Вы создатель этого проекта.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="side-card">
+                <div class="side-card-head">
+                    <h2>Участники <span class="count-badge">{{ project.member_count }}</span></h2>
+                </div>
+                <ul class="member-list">
+                    {% for membership in memberships %}
+                        <li class="member-item">
+                            <a class="avatar avatar-sm" href="{% url 'ideas:profile' membership.user.username %}">
+                                {% if membership.user.profile.avatar %}
+                                    <img src="{{ membership.user.profile.avatar.url }}" alt="">
+                                {% else %}
+                                    <span>{{ membership.user|initials }}</span>
+                                {% endif %}
+                            </a>
+                            <div class="member-info">
+                                <a href="{% url 'ideas:profile' membership.user.username %}">
+                                    {{ membership.user.get_full_name|default:membership.user.username }}
+                                </a>
+                                {% if membership.user_id == project.creator_id %}
+                                    <small><i class="bi bi-star-fill" aria-hidden="true"></i> Создатель</small>
+                                {% else %}
+                                    <small>{{ membership.get_role_display }}</small>
+                                {% endif %}
+                            </div>
+                            {% if is_manager and membership.user_id != project.creator_id %}
+                                <div class="member-controls">
+                                    <form method="post" action="{% url 'ideas:project_member_role' project.slug membership.user_id %}"
+                                          class="member-role-form">
+                                        {% csrf_token %}
+                                        <label class="sr-only" for="role-{{ membership.pk }}">Роль участника {{ membership.user.username }}</label>
+                                        <select id="role-{{ membership.pk }}" name="role" class="input input-select input-xs">
+                                            {% for value, label in role_choices %}
+                                                <option value="{{ value }}" {% if membership.role == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="icon-btn" aria-label="Сохранить роль">
+                                            <i class="bi bi-check2" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'ideas:project_member_remove' project.slug membership.user_id %}"
+                                          data-confirm="Удалить {{ membership.user.username }} из проекта?">
+                                        {% csrf_token %}
+                                        <button type="submit" class="icon-btn icon-btn-danger" aria-label="Удалить участника">
+                                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="member-empty">Участников пока нет.</li>
+                    {% endfor %}
+                </ul>
+
+                {% if is_manager and member_form %}
+                    <form method="post" action="{% url 'ideas:project_member_add' project.slug %}" class="member-add">
+                        {% csrf_token %}
+                        <h3>Пригласить участника</h3>
+                        <label for="{{ member_form.username.id_for_label }}">Логин пользователя</label>
+                        {{ member_form.username }}
+                        {% for error in member_form.username.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                        <label for="{{ member_form.role.id_for_label }}">Роль</label>
+                        {{ member_form.role }}
+                        <button class="btn btn-ghost btn-sm btn-block" type="submit">
+                            <i class="bi bi-person-plus" aria-hidden="true"></i> Добавить в команду
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {% if is_manager and attach_form %}
+                <div class="side-card">
+                    <div class="side-card-head"><h2>Добавить идею</h2></div>
+                    {% if attach_form.fields.idea.queryset.exists %}
+                        <form method="post" action="{% url 'ideas:project_idea_add' project.slug %}" class="attach-form">
+                            {% csrf_token %}
+                            <label for="{{ attach_form.idea.id_for_label }}">Ваша идея</label>
+                            {{ attach_form.idea }}
+                            {% for error in attach_form.idea.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                            <button class="btn btn-ghost btn-sm btn-block" type="submit">
+                                <i class="bi bi-plus-lg" aria-hidden="true"></i> Добавить в проект
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="side-muted">Все ваши идеи уже добавлены или у вас пока нет идей для прикрепления.</p>
+                        <a class="btn btn-ghost btn-sm btn-block" href="{% url 'ideas:idea_create' %}">Создать идею</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+</section>
+{% endblock %}

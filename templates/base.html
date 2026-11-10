@@ -1,0 +1,71 @@
+{% load static idea_extras %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}IdeaMix — от идеи к реальности{% endblock %}</title>
+    <meta name="description" content="{% block description %}IdeaMix — пространство, где люди делятся идеями, находят единомышленников и превращают задумки в реальные проекты.{% endblock %}">
+    <meta name="theme-color" content="#f8f7fd" data-theme-color>
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('ideamix-theme');
+                var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var theme = saved === 'dark' || saved === 'light' ? saved : (dark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (error) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <meta property="og:site_name" content="IdeaMix">
+    <meta property="og:title" content="{% block og_title %}IdeaMix — от идеи к реальности{% endblock %}">
+    <meta property="og:description" content="Делитесь идеями, находите команду и создавайте проекты вместе.">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}" data-page="{{ request.resolver_match.url_name|default:'' }}">
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<div class="page-ambient" aria-hidden="true">
+    <span class="ambient-blob ambient-blob-1"></span>
+    <span class="ambient-blob ambient-blob-2"></span>
+</div>
+<div class="route-progress" data-route-progress aria-hidden="true"></div>
+
+{% include 'includes/navbar.html' %}
+{% include 'includes/messages.html' %}
+
+<main id="main" class="{% block main_class %}main-content{% endblock %}">
+    {% block content %}{% endblock %}
+</main>
+
+{% include 'includes/footer.html' %}
+
+<div class="modal-backdrop" id="confirmModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+        <span class="modal-icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+        <h2 id="confirmTitle">Подтвердите действие</h2>
+        <p id="confirmText">Это действие нельзя отменить.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-modal-cancel>Отмена</button>
+            <button type="button" class="btn btn-danger" data-modal-confirm>Подтвердить</button>
+        </div>
+    </div>
+</div>
+
+<button class="back-to-top" type="button" data-back-to-top aria-label="Наверх">
+    <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>
+
+<script src="{% static 'js/main.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

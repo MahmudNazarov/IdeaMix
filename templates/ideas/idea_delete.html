@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}Удалить «{{ idea.title }}» — IdeaMix{% endblock %}
+{% block description %}Подтверждение удаления идеи «{{ idea.title }}» с платформы IdeaMix.{% endblock %}
+
+{% block content %}
+<div class="container confirm-wrap">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки">
+        <a href="{% url 'ideas:my_ideas' %}">Мои идеи</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <a href="{{ idea.get_absolute_url }}">{{ idea.title|truncatechars:42 }}</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <span>Удаление</span>
+    </nav>
+
+    <div class="confirm-card">
+        <span class="confirm-icon confirm-icon-danger" aria-hidden="true">
+            <i class="bi bi-trash3"></i>
+        </span>
+        <span class="eyebrow eyebrow-danger">Необратимое действие</span>
+        <h1>Удалить эту идею?</h1>
+        <p class="confirm-lead">
+            Идея, её обложка, лайки, комментарии и записи в избранном будут удалены
+            без возможности восстановления.
+        </p>
+
+        <div class="confirm-preview">
+            <span class="confirm-preview-cover" style="--card-hue: {{ idea|card_hue }};">
+                {% if idea.cover_image %}
+                    <img src="{{ idea.cover_image.url }}" alt="">
+                {% else %}
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                {% endif %}
+            </span>
+            <div>
+                <strong>{{ idea.title }}</strong>
+                <span>{{ idea.get_status_display }} · {{ idea.created_at|date:"d.m.Y" }} · {{ idea.like_count }} лайков</span>
+            </div>
+        </div>
+
+        <div class="confirm-note">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            <p>Если вы хотите просто убрать идею из общего каталога, измените её видимость на «Приватная» или статус на «Черновик».</p>
+        </div>
+
+        <form method="post" class="confirm-actions">
+            {% csrf_token %}
+            <a class="btn btn-ghost" href="{{ idea.get_absolute_url }}">Оставить идею</a>
+            <a class="btn btn-soft" href="{% url 'ideas:idea_edit' idea.slug %}">
+                <i class="bi bi-pencil" aria-hidden="true"></i> Редактировать
+            </a>
+            <button class="btn btn-danger" type="submit">
+                <i class="bi bi-trash3" aria-hidden="true"></i> Удалить навсегда
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

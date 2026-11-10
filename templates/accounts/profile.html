@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load idea_extras %}
+
+{% block title %}{{ profile.display_name }} (@{{ profile_user.username }}) — IdeaMix{% endblock %}
+{% block description %}{{ profile.bio|default:"Профиль участника IdeaMix: идеи, проекты и команды."|striptags|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ profile.display_name }} — IdeaMix{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="profile-hero">
+        <div class="profile-cover" aria-hidden="true">
+            <span class="profile-cover-orb profile-cover-orb-1"></span>
+            <span class="profile-cover-orb profile-cover-orb-2"></span>
+            <span class="profile-cover-grid"></span>
+        </div>
+
+        <div class="profile-hero-body">
+            <div class="profile-avatar-wrap">
+                <span class="avatar avatar-2xl profile-avatar">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Аватар {{ profile.display_name }}">
+                    {% else %}
+                        <span>{{ profile_user|initials }}</span>
+                    {% endif %}
+                </span>
+                {% if is_self %}<span class="profile-self-badge"><i class="bi bi-check2" aria-hidden="true"></i> Это вы</span>{% endif %}
+            </div>
+
+            <div class="profile-main">
+                <div class="profile-title-row">
+                    <div>
+                        <h1>{{ profile.display_name }}</h1>
+                        <p class="profile-handle">@{{ profile_user.username }}</p>
+                    </div>
+                    <div class="profile-actions">
+                        {% if is_self %}
+                            <a class="btn btn-primary btn-sm" href="{% url 'ideas:idea_create' %}">
+                                <i class="bi bi-plus-lg" aria-hidden="true"></i> Новая идея
+                            </a>
+                            <a class="btn btn-ghost btn-sm" href="{% url 'ideas:profile_edit' %}">
+                                <i class="bi bi-gear" aria-hidden="true"></i> Настройки
+                            </a>
+                        {% else %}
+                            <a class="btn btn-ghost btn-sm" href="{% url 'ideas:project_list' %}?q={{ profile_user.username|urlencode }}">
+                                <i class="bi bi-kanban" aria-hidden="true"></i> Проекты автора
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if profile.bio %}
+                    <p class="profile-bio">{{ profile.bio|linebreaksbr }}</p>
+                {% else %}
+                    <p class="profile-bio profile-bio-empty">
+                        {% if is_self %}Расскажите о себе в настройках — это поможет найти единомышленников.{% else %}Участник пока не рассказал о себе.{% endif %}
+                    </p>
+                {% endif %}
+
+                <ul class="profile-facts">
+                    {% if profile.location %}
+                        <li><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ profile.location }}</li>
+                    {% endif %}
+                    {% if profile.website %}
+                        <li>
+                            <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                            <a href="{{ profile.website }}" target="_blank" rel="noopener noreferrer">{{ profile.website|truncatechars:38 }}</a>
+                        </li>
+                    {% endif %}
+                    <li><i class="bi bi-calendar3" aria-hidden="true"></i> На IdeaMix с {{ profile_user.date_joined|date:"F Y" }}</li>
+                </ul>
+
+                {% if profile.skills_list %}
+                    <div class="profile-skills">
+                        {% for skill in profile.skills_list %}
+                            <span class="skill-chip">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <dl class="profile-stats">
+                <div><dt>{{ stats.ideas|compact }}</dt><dd>идей</dd></div>
+                <div><dt>{{ stats.projects|compact }}</dt><dd>проектов</dd></div>
+                <div><dt>{{ stats.likes|compact }}</dt><dd>лайков</dd></div>
+                <div><dt>{{ stats.views|compact }}</dt><dd>просмотров</dd></div>
+            </dl>
+        </div>
+    </section>
+
+    <div class="profile-content">
+        <div class="profile-tabs" role="tablist" aria-label="Разделы профиля">
+            <a class="profile-tab {% if tab == 'ideas' %}active{% endif %}"
+               href="?tab=ideas" role="tab" aria-selected="{% if tab == 'ideas' %}true{% else %}false{% endif %}">
+                <i class="bi bi-lightbulb" aria-hidden="true"></i> Идеи <span>{{ counts.ideas }}</span>
+            </a>
+            <a class="profile-tab {% if tab == 'projects' %}active{% endif %}"
+               href="?tab=projects" role="tab" aria-selected="{% if tab == 'projects' %}true{% else %}false{% endif %}">
+                <i class="bi bi-kanban" aria-hidden="true"></i> Проекты <span>{{ counts.projects }}</span>
+            </a>
+            <a class="profile-tab {% if tab == 'teams' %}active{% endif %}"
+               href="?tab=teams" role="tab" aria-selected="{% if tab == 'teams' %}true{% else %}false{% endif %}">
+                <i class="bi bi-people" aria-hidden="true"></i> Команды <span>{{ counts.teams }}</span>
+            </a>
+            {% if is_self %}
+                <a class="profile-tab {% if tab == 'favorites' %}active{% endif %}"
+                   href="?tab=favorites" role="tab" aria-selected="{% if tab == 'favorites' %}true{% else %}false{% endif %}">
+                    <i class="bi bi-bookmark" aria-hidden="true"></i> Избранное <span>{{ counts.favorites }}</span>
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="profile-panel">
+            {% if tab == 'ideas' %}
+                <div class="panel-head">
+                    <div>
+                        <h2>{% if is_self %}Ваши идеи{% else %}Идеи автора{% endif %}</h2>
+                        <p>{% if is_self %}Все статусы, включая черновики и приватные задумки.{% else %}Опубликованные идеи, доступные сообществу.{% endif %}</p>
+                    </div>
+                    {% if is_self %}
+                        <a class="section-link" href="{% url 'ideas:my_ideas' %}">Управлять идеями <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+
+                {% if ideas %}
+                    <div class="idea-grid">
+                        {% for idea in ideas %}
+                            {% include 'includes/idea_card.html' %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state empty-state-inline">
+                        <span class="empty-inline-icon"><i class="bi bi-lightbulb" aria-hidden="true"></i></span>
+                        <h3>{% if is_self %}У вас пока нет идей{% else %}Автор пока не опубликовал идеи{% endif %}</h3>
+                        <p>{% if is_self %}Поделитесь первой задумкой — сообщество поможет её усилить.{% else %}Загляните позже или исследуйте другие идеи каталога.{% endif %}</p>
+                        {% if is_self %}
+                            <a class="btn btn-primary btn-sm" href="{% url 'ideas:idea_create' %}">Создать идею</a>
+                        {% else %}
+                            <a class="btn btn-ghost btn-sm" href="{% url 'ideas:explore' %}">Открыть каталог</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% elif tab == 'projects' %}
+                <div class="panel-head">
+                    <div>
+                        <h2>{% if is_self %}Ваши проекты{% else %}Проекты автора{% endif %}</h2>
+                        <p>Команды, которые автор создал вокруг своих идей.</p>
+                    </div>
+                    {% if is_self %}
+                        <a class="section-link" href="{% url 'ideas:project_create' %}">Новый проект <i class="bi bi-plus-lg" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+
+                {% if projects %}
+                    <div class="project-grid">
+                        {% for project in projects %}
+                            {% include 'includes/project_card.html' %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state empty-state-inline">
+                        <span class="empty-inline-icon"><i class="bi bi-kanban" aria-hidden="true"></i></span>
+                        <h3>Проектов пока нет</h3>
+                        <p>{% if is_self %}Превратите идею в проект и пригласите команду.{% else %}Автор ещё не создал ни одного проекта.{% endif %}</p>
+                        {% if is_self %}
+                            <a class="btn btn-primary btn-sm" href="{% url 'ideas:project_create' %}">Создать проект</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% elif tab == 'teams' %}
+                <div class="panel-head">
+                    <div>
+                        <h2>Команды</h2>
+                        <p>Проекты, в которых {% if is_self %}вы участвуете{% else %}участвует автор{% endif %}.</p>
+                    </div>
+                </div>
+
+                {% if teams %}
+                    <div class="project-grid">
+                        {% for project in teams %}
+                            {% include 'includes/project_card.html' %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state empty-state-inline">
+                        <span class="empty-inline-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                        <h3>Пока без команды</h3>
+                        <p>{% if is_self %}Найдите открытый проект и присоединитесь к нему.{% else %}Автор пока не состоит в командах проектов.{% endif %}</p>
+                        <a class="btn btn-ghost btn-sm" href="{% url 'ideas:project_list' %}">Смотреть проекты</a>
+                    </div>
+                {% endif %}
+
+            {% elif tab == 'favorites' and is_self %}
+                <div class="panel-head">
+                    <div>
+                        <h2>Избранное</h2>
+                        <p>Идеи, которые вы сохранили для вдохновения.</p>
+                    </div>
+                    <a class="section-link" href="{% url 'ideas:favorites' %}">Вся коллекция <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                </div>
+
+                {% if favorites %}
+                    <div class="idea-grid">
+                        {% for idea in favorites %}
+                            {% include 'includes/idea_card.html' %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state empty-state-inline">
+                        <span class="empty-inline-icon"><i class="bi bi-bookmark" aria-hidden="true"></i></span>
+                        <h3>Коллекция пока пуста</h3>
+                        <p>Сохраняйте идеи кнопкой «В избранное», чтобы вернуться к ним позже.</p>
+                        <a class="btn btn-ghost btn-sm" href="{% url 'ideas:explore' %}">Найти идеи</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
